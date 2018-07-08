@@ -39,7 +39,7 @@ int main(int argc, char const *argv[])
         // Sort vector of ip-addresses in reverse lexicographical order
         // Compare each octet in order from left to right
         std::sort(ip_pool.begin(), ip_pool.end(), 
-                [](string_vector &first, string_vector &second) {
+                [](const string_vector &first, const string_vector &second) {
                     for (int i = 0; i < 4; ++i) {
                         if (first[i].size() > second[i].size())
                             return true;

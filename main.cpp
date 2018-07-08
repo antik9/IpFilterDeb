@@ -15,7 +15,7 @@ int main(int argc, char const *argv[])
 {
     try
     {
-        if (argc == 2 and std::string(argv[1]) == "-v" 
+        if (argc == 2 && std::string(argv[1]) == "-v" 
                 || std::string(argv[1]) == "--version") {
             std::cout << "VERSION: " << version() << std::endl;
             return 0;

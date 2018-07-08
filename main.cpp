@@ -3,13 +3,12 @@
 #include <cstdlib>
 #include <iostream>
 #include "version.h"
-#include "ip_filter.h"
+#include "ip_filter.hpp"
 
 /* 
  * using string_vector = std::vector<std::string>;
  * using string_size_t = std::string::size_type;
  */
-
 
 int main(int argc, char const *argv[])
 {
@@ -43,28 +42,11 @@ int main(int argc, char const *argv[])
                     }
                     return false;
                     });
-
-        // Filtering
-        // First condition to print all ip-addresses without any filter
-        print_ip_pool_by_filter(ip_pool, [](const string_vector &ip_address) {
-                    return true;
-                });
-
-        // Second condition to print all ip addresses satisfied by `1.*.*.*`
-        print_ip_pool_by_filter(ip_pool, [](const string_vector &ip_address) {
-                    return ip_address[0] == "1";
-                });
         
-        // Third condition to print all ip addresses satisfied by `46.70.*.*` 
-        print_ip_pool_by_filter(ip_pool, [](const string_vector &ip_address) {
-                    return ip_address[0] == "46" && ip_address[1] == "70";
-                });
-        
-        // Fourth condition to print all ip addresses satisfied by having 46 in it 
-        print_ip_pool_by_filter(ip_pool, [](const string_vector &ip_address) {
-                    return ip_address[0] == "46" || ip_address[1] == "46" 
-                        || ip_address[2] == "46" || ip_address[3] == "46";
-                });
+        print_ip_pool_by_filter(ip_pool);
+        print_ip_pool_by_filter(ip_pool, "1");
+        print_ip_pool_by_filter(ip_pool, "46", "70");
+        print_ip_pool_by_filter_any_of(ip_pool, "46");
     }
     catch(const std::exception &e)
     {

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include "ip_filter.h"
+#include "ip_filter.hpp"
 
 string_vector split(const std::string &str, char delim);
 
@@ -35,8 +35,7 @@ public:
 
 TEST_F(TestPrintIp, printAll) {
     testing::internal::CaptureStdout();
-    print_ip_pool_by_filter(test_ips, 
-            [](const string_vector &ip_address) {return true;});
+    print_ip_pool_by_filter(test_ips);
     std::string output = testing::internal::GetCapturedStdout();
     ASSERT_EQ( output, 
             "12.15.16.90\n"
@@ -48,8 +47,7 @@ TEST_F(TestPrintIp, printAll) {
 
 TEST_F(TestPrintIp, printOnlyWith1AtFirstPosition) {
     testing::internal::CaptureStdout();
-    print_ip_pool_by_filter(test_ips, 
-            [](const string_vector &ip_address) {return ip_address[0] == "1";});
+    print_ip_pool_by_filter(test_ips, "1");
     std::string output = testing::internal::GetCapturedStdout();
     ASSERT_EQ( output, 
             "1.45.43.46\n"
@@ -58,9 +56,7 @@ TEST_F(TestPrintIp, printOnlyWith1AtFirstPosition) {
 
 TEST_F(TestPrintIp, print_46_70) {
     testing::internal::CaptureStdout();
-    print_ip_pool_by_filter(test_ips, 
-            [](const string_vector &ip_address) {
-                return ip_address[0] == "46" && ip_address[1] == "70";});
+    print_ip_pool_by_filter(test_ips, "46", "70");
     std::string output = testing::internal::GetCapturedStdout();
     ASSERT_EQ( output, 
             "46.70.100.100\n" );
@@ -68,10 +64,7 @@ TEST_F(TestPrintIp, print_46_70) {
 
 TEST_F(TestPrintIp, printWith46) {
     testing::internal::CaptureStdout();
-    print_ip_pool_by_filter(test_ips, 
-            [](const string_vector &ip_address) {
-                return ip_address[0] == "46" || ip_address[1] == "46"
-                || ip_address[2] == "46" || ip_address[3] == "46";});
+    print_ip_pool_by_filter_any_of(test_ips, "46");
     std::string output = testing::internal::GetCapturedStdout();
     ASSERT_EQ( output, 
             "1.45.43.46\n"

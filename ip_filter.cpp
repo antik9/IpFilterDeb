@@ -25,12 +25,36 @@ string_vector split(const std::string &str, char delim)
     return ip_address;
 }
 
-void print_ip_pool_by_filter(std::vector<string_vector> ip_pool, 
-        bool (*is_satisfy) (const string_vector &ip_address)) 
+
+void __print_ip_pool_by_filter(std::vector<string_vector> ip_pool, 
+        const string_vector &conditions, bool any_of = false) 
 {
+    /* 
+     * Lambda function to check if ip_address satisfy to condtion.
+     * If any_of flag is true, then we should check that octet of
+     * ip_address is equal to any of condition strings.
+     */
+    auto is_satisfy = [](const string_vector& ip_address,
+            const string_vector &conditions, bool any_of) {
+        if ( any_of ) {
+            for ( auto ip_it = ip_address.begin(); ip_it < ip_address.end(); ++ip_it)
+                for ( auto filter_it = conditions.begin();
+                        filter_it < conditions.end(); ++ filter_it)
+                    if ( *filter_it == *ip_it )
+                        return true;
+            return false;
+        }
+        else {
+            for (size_t i = 0; i < conditions.size(); ++i)
+                if ( ip_address[i] != conditions[i] )
+                    return false;
+            return true;
+        }
+    };
+
     for(auto ip = ip_pool.cbegin(); ip != ip_pool.cend(); ++ip)
     {
-        if (is_satisfy(*ip)) { 
+        if (is_satisfy(*ip, conditions, any_of)) { 
             for(auto ip_part = ip->cbegin(); ip_part != ip->cend(); ++ip_part)
             {
                 if (ip_part != ip->cbegin())

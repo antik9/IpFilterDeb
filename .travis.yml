@@ -5,9 +5,9 @@ before_install:
  - sudo apt-get install -y libboost-program-options-dev
  - sudo apt-get install -y libgtest-dev google-mock cmake unzip
  - sudo wget https://github.com/google/googletest/archive/master.zip
- - sudo unzip master.zip && rm master.zip
+ - sudo unzip master.zip && sudo rm -f master.zip
  - sudo wget https://github.com/google/googlemock/archive/master.zip
- - sudo unzip master.zip && rm master.zip
+ - sudo unzip master.zip && sudo rm -f master.zip
  - cd googletest-master/googletest
  - sudo cmake -DBUILD_SHARED_LIBS=ON .
  - sudo make

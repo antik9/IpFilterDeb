@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 3.2)
 
-if (NOT DEFINED $ENV{TRAVIS_BUILD_NUMBER})
-    set(BUILD_NUMBER 1)
-else()
-    set(BUILD_NUMBER $ENV{TRAVIS_BUILD_NUMBER})
-endif()
+set(BUILD_NUMBER 1)
 
 project(allocator VERSION 0.0.${BUILD_NUMBER})
 

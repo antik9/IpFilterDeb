@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.2)
 
-set(BUILD_NUMBER 1)
+set(BUILD_NUMBER 2)
 
 project(allocator VERSION 0.0.${BUILD_NUMBER})
 

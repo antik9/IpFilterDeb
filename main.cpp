@@ -1,57 +1,41 @@
-#include <algorithm>
-#include <cassert>
-#include <cstdlib>
 #include <iostream>
-#include "version.h"
-#include "ip_filter.hpp"
+#include <map>
+#include "list.hpp"
+#include "allocator.hpp"
 
-/* 
- * using string_vector = std::vector<std::string>;
- * using string_size_t = std::string::size_type;
- */
+int factorial (int n) { 
+    return n == 0 ? 1 : n * factorial(n - 1); 
+}
 
-int main(int argc, char const *argv[])
+int main()
 {
-    try
-    {
-        if (argc == 2 && (std::string(argv[1]) == "-v" 
-                || std::string(argv[1]) == "--version")) {
-            std::cout << "VERSION: " << version() << std::endl;
-            return 0;
-        }
+    using int_pair = std::pair<int,int>;
+    
+    // DEFAULT MAP
+    std::map<int, int>  default_map;
+    for (int i = 0; i < 10; ++i)
+        default_map.insert(int_pair{i, factorial(i)});
+    
+    // MAP WITH CUSTOM ALLOCATOR
+    std::map<int, int, std::less<int>, Allocator<int, 10>>  custom_map;
+    for (int i = 0; i < 10; ++i)
+        custom_map.insert(int_pair{i, factorial(i)});
 
-        std::vector<string_vector> ip_pool;
+    for (auto it = custom_map.begin(); it != custom_map.end(); ++it)
+        std::cout << it->first << " " << it->second << std::endl;
+   
+    // DEFAULT ALLOCATOR WITH CUSTOM LIST
+    List<int, std::allocator<int>> list_with_default_allocator;
+    for (int i = 0; i < 10; ++i)
+        list_with_default_allocator.push_back(i);
+    
+    // CUSTOM ALLOCATOR WITH CUSTOM LIST
+    List<int, Allocator<int, 10>> list_with_custom_allocator;
+    for (int i = 0; i < 10; ++i)
+        list_with_custom_allocator.push_back(i);
 
-        for(std::string line; std::getline(std::cin, line);)
-        {
-             string_vector incoming_information = split(line, '\t');
-             ip_pool.push_back(split(incoming_information.at(0), '.'));
-        }
-        
-        // Sort vector of ip-addresses in reverse lexicographical order
-        // Compare each octet in order from left to right
-        std::sort(ip_pool.begin(), ip_pool.end(), 
-                [](const string_vector &first, const string_vector &second) {
-                    for (int i = 0; i < 4; ++i) {
-                        if (first[i].size() > second[i].size())
-                            return true;
-                        else if (first[i].size() < second[i].size())
-                            return false;
-                        else if (first[i].compare(second[i]))
-                            return first[i].compare(second[i]) > 0 ? true : false;
-                    }
-                    return false;
-                    });
-        
-        print_ip_pool_by_filter(ip_pool);
-        print_ip_pool_by_filter(ip_pool, "1");
-        print_ip_pool_by_filter(ip_pool, "46", "70");
-        print_ip_pool_by_filter_any_of(ip_pool, "46");
-    }
-    catch(const std::exception &e)
-    {
-        std::cerr << e.what() << std::endl;
-    }
+    for (auto it = list_with_custom_allocator.begin(); it != list_with_custom_allocator.end(); ++it)
+        std::cout << *it << std::endl;
 
     return 0;
 }

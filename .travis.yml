@@ -1,14 +1,10 @@
 language: cpp
 
+sudo: required
+
 before_install:
  - sudo apt-get -qq update
- - sudo apt-get install -y cmake unzip wget
- - wget "https://curl.haxx.se/download/curl-7.61.0.zip"
- - unzip curl-7.61.0.zip
- - cd curl-7.61.0
- - ./configure --with-ssl
- - make
- - sudo make install
+ - sudo apt-get install -y cmake 
  - cd "${TRAVIS_BUILD_DIR}"
 
 script:
@@ -20,7 +16,6 @@ deploy:
   provider: script
   skip_cleanup: true
   script:
-  - curl -T allocator-0.0.1-Linux.deb -uantik9:$BINTRAY_API_KEY \
-    "https://api.bintray.com/content/antik9/HelloWorld/allocator/1/allocator-0.0.1-Linux.deb;deb_distribution=trusty;deb_component=main;deb_architecture=amd64;publish=1"
+  - curl -T allocator-0.0.1-Linux.deb -uantik9:$BINTRAY_API_KEY "https://api.bintray.com/content/antik9/HelloWorld/allocator/1/allocator-0.0.1-Linux.deb;deb_distribution=trusty;deb_component=main;deb_architecture=amd64;publish=1"
   on:
       branch: allocator

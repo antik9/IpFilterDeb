@@ -2,7 +2,13 @@ language: cpp
 
 before_install:
  - sudo apt-get -qq update
- - sudo apt-get install -y cmake curl 
+ - sudo apt-get install -y cmake unzip wget
+ - wget "https://curl.haxx.se/download/curl-7.61.0.zip"
+ - unzip curl-7.61.0.zip
+ - cd curl-7.61.0
+ - ./configure --with-ssl
+ - make
+ - sudo make install
  - cd "${TRAVIS_BUILD_DIR}"
 
 script:

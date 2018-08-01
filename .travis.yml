@@ -4,18 +4,26 @@ sudo: required
 
 before_install:
  - sudo apt-get -qq update
- - sudo apt-get install -y cmake 
+ - sudo apt-get install -y libgtest-dev google-mock cmake unzip
+ - sudo wget https://github.com/google/googletest/archive/master.zip
+ - sudo unzip master.zip && sudo rm -f master.zip
+ - cd googletest-master/googletest
+ - sudo cmake -DBUILD_SHARED_LIBS=ON .
+ - sudo make
+ - sudo cp -a include/gtest /usr/include
+ - sudo cp -a libgtest_main.so libgtest.so /usr/lib/
  - cd "${TRAVIS_BUILD_DIR}"
 
 script:
 - cmake .
 - cmake --build .
 - cmake --build . --target package
+- cmake --build . --target test
 
 deploy:
   provider: script
   skip_cleanup: true
   script:
-      - curl -T allocator-0.0.2-Linux.deb -uantik9:$BINTRAY_API_KEY "https://api.bintray.com/content/antik9/HelloWorld/allocator/2/allocator-0.0.2-Linux.deb;deb_distribution=trusty;deb_component=main;deb_architecture=amd64;publish=1"
+      - curl -T allocator-0.0.1-Linux.deb -uantik9:$BINTRAY_API_KEY "https://api.bintray.com/content/antik9/HelloWorld/allocator/$TRAVIS_BUILD_NUMBER/allocator-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb;deb_distribution=trusty;deb_component=main;deb_architecture=amd64;publish=1"
   on:
       branch: allocator

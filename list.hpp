@@ -25,11 +25,11 @@ public:
     using pointer       = node*;
     using Alloc         = typename _Alloc::template rebind<node>::other; 
 
-    List() : head(nullptr), tail(nullptr), allocator(Alloc()), post_tail(node()) {}
+    List() : head(nullptr), tail(nullptr), allocator(Alloc()) {}
     
     ~List() {
         auto current    = head;
-        while ( current && current != &post_tail ) {
+        while ( current ) {
             auto next   = current->next;
             allocator.deallocate(current, sizeof(node));
             current->~node();
@@ -42,13 +42,13 @@ public:
 	    ptr->value      = value;
 	    if ( head == nullptr ) {
 	        head        = ptr;
-	        head->next  = &post_tail;
+	        head->next  = nullptr;
         }
         else {
             tail->next  = ptr;
         }
 	    tail            = ptr;
-        tail->next      = &post_tail;
+        tail->next      = nullptr;
 	}
 
     struct iterator : public std::iterator<std::forward_iterator_tag, value_type> {
@@ -72,12 +72,11 @@ public:
 
     // определите методы begin / end
     iterator begin()    const   { return iterator(head) ; }
-    iterator end()      const   { return iterator((pointer) &post_tail) ; }
+    iterator end()      const   { return iterator((pointer) nullptr) ; }
 
 private:
     pointer             head;
     pointer             tail;
-    node                post_tail;
     Alloc               allocator;
 };
 

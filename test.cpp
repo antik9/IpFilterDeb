@@ -18,9 +18,9 @@ TEST(ListTest, iteratorTest) {
 }
 
 TEST(AllocatorTest, constructAndDestroyTest) {
-    std::string TEST_VALUE = std::string("PASS");
-    std::string *ptr = new std::string;
-    Allocator<std::string, 2> allocator;
+    double TEST_VALUE = 4.5; 
+    double *ptr = new double;
+    Allocator<double, 2> allocator;
     
     /* Check construction */
     allocator.construct(ptr, TEST_VALUE); 
@@ -46,21 +46,21 @@ TEST(AllocatorTest, rebindTest) {
 
 TEST(AllocatorTest, allocationTest) {
     int TEST_LOOP = 5000;
-    std::vector<std::string, Allocator<std::string, 10>> vec_string;
+    std::vector<double, Allocator<double, 10>> vec_double;
     for ( int i = 0; i < TEST_LOOP; ++i ) {
         if ( i % 2 )
-            vec_string.push_back("foo");
+            vec_double.push_back(14.5);
         else
-            vec_string.push_back("baz");
+            vec_double.push_back(15.4);
     }
     
-    ASSERT_EQ(vec_string.size(), TEST_LOOP);
+    ASSERT_EQ(vec_double.size(), TEST_LOOP);
 
     for ( int i = 0; i < TEST_LOOP; ++i ) {
         if ( i % 2 )
-            ASSERT_EQ(vec_string[i], "foo");
+            ASSERT_EQ(vec_double[i], 14.5);
         else
-            ASSERT_EQ(vec_string[i], "baz");
+            ASSERT_EQ(vec_double[i], 15.4);
     }
 }
 

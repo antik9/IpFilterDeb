@@ -29,8 +29,6 @@ script:
 - cmake --build .
 - cmake --build . --target package
 - cd ..
-- rm -rf google*
-- rm -rf tests
 - doxygen Doxyfile
 
 deploy:

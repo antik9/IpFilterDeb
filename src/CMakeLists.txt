@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.2)
 
-if(NOT DEFINED $ENV{TRAVIS_BUILD_NUMBER}) 
-    set (BUILD_NUMBER 1)
-else ()
+if($ENV{TRAVIS_BUILD_NUMBER}) 
     set (BUILD_NUMBER $ENV{TRAVIS_BUILD_NUMBER})
+else ()
+    set (BUILD_NUMBER 1)
 endif()
 
 project(print_ip VERSION 0.0.${BUILD_NUMBER})

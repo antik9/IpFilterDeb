@@ -1,1 +1,0 @@
-/usr/bin/g++    -rdynamic CMakeFiles/print_ip.dir/main.cpp.o  -o print_ip 

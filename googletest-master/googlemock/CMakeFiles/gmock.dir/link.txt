@@ -1,1 +1,0 @@
-/usr/bin/g++  -fPIC    -shared -Wl,-soname,libgmock.so -o libgmock.so CMakeFiles/gmock.dir/src/gmock-all.cc.o -lpthread gtest/libgtest.so -lpthread -Wl,-rpath,/home/travis/build/antik9/OtusCpp/googletest-master/googlemock/gtest 

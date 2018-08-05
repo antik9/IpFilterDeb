@@ -1,4 +1,0 @@
-/home/travis/build/antik9/OtusCpp/googletest-master/googlemock/CMakeFiles/gmock.dir
-/home/travis/build/antik9/OtusCpp/googletest-master/googlemock/CMakeFiles/gmock_main.dir
-/home/travis/build/antik9/OtusCpp/googletest-master/googlemock/gtest/CMakeFiles/gtest.dir
-/home/travis/build/antik9/OtusCpp/googletest-master/googlemock/gtest/CMakeFiles/gtest_main.dir

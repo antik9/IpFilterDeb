@@ -1,2 +1,0 @@
-/home/travis/build/antik9/OtusCpp/googletest-master/googletest/CMakeFiles/gtest.dir
-/home/travis/build/antik9/OtusCpp/googletest-master/googletest/CMakeFiles/gtest_main.dir

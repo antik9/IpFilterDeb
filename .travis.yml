@@ -2,7 +2,7 @@ language: cpp
 
 before_install:
  - sudo apt-get -qq update
- - sudo apt-get install -y libgtest-dev google-mock cmake unzip
+ - sudo apt-get install -y libgtest-dev google-mock cmake unzip doxygen
  - sudo wget https://github.com/google/googletest/archive/master.zip
  - sudo unzip master.zip && sudo rm -f master.zip
  - sudo wget https://github.com/google/googlemock/archive/master.zip
@@ -29,6 +29,9 @@ script:
 - cmake --build .
 - cmake --build . --target package
 - cd ..
+- rm -rf google*
+- rm -rf tests
+- doxygen Doxyfile
 
 deploy:
 - provider: script
@@ -41,5 +44,6 @@ deploy:
   skip-cleanup: true
   github-token: $GITHUB_TOKEN
   keep_history: true
+  local_dir: html
   on:
       branch: print-ip

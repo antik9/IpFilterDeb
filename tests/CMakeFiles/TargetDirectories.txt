@@ -1,0 +1,4 @@
+/home/travis/build/antik9/OtusCpp/tests/CMakeFiles/rebuild_cache.dir
+/home/travis/build/antik9/OtusCpp/tests/CMakeFiles/test.dir
+/home/travis/build/antik9/OtusCpp/tests/CMakeFiles/edit_cache.dir
+/home/travis/build/antik9/OtusCpp/tests/CMakeFiles/print_ip_test.dir

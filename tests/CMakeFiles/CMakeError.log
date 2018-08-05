@@ -1,0 +1,51 @@
+Determining if the pthread_create exist failed with the following output:
+Change Dir: /home/travis/build/antik9/OtusCpp/tests/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_7b9df/fast"
+/usr/bin/make -f CMakeFiles/cmTC_7b9df.dir/build.make CMakeFiles/cmTC_7b9df.dir/build
+make[1]: Entering directory `/home/travis/build/antik9/OtusCpp/tests/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_7b9df.dir/CheckSymbolExists.c.o
+/usr/bin/gcc    -o CMakeFiles/cmTC_7b9df.dir/CheckSymbolExists.c.o   -c /home/travis/build/antik9/OtusCpp/tests/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTC_7b9df
+/usr/local/cmake-3.9.2/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7b9df.dir/link.txt --verbose=1
+/usr/bin/gcc      -rdynamic CMakeFiles/cmTC_7b9df.dir/CheckSymbolExists.c.o  -o cmTC_7b9df 
+CMakeFiles/cmTC_7b9df.dir/CheckSymbolExists.c.o: In function `main':
+CheckSymbolExists.c:(.text+0x16): undefined reference to `pthread_create'
+collect2: error: ld returned 1 exit status
+make[1]: *** [cmTC_7b9df] Error 1
+make[1]: Leaving directory `/home/travis/build/antik9/OtusCpp/tests/CMakeFiles/CMakeTmp'
+make: *** [cmTC_7b9df/fast] Error 2
+
+File /home/travis/build/antik9/OtusCpp/tests/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/travis/build/antik9/OtusCpp/tests/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_82dbf/fast"
+/usr/bin/make -f CMakeFiles/cmTC_82dbf.dir/build.make CMakeFiles/cmTC_82dbf.dir/build
+make[1]: Entering directory `/home/travis/build/antik9/OtusCpp/tests/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_82dbf.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_82dbf.dir/CheckFunctionExists.c.o   -c /usr/local/cmake-3.9.2/share/cmake-3.9/Modules/CheckFunctionExists.c
+Linking C executable cmTC_82dbf
+/usr/local/cmake-3.9.2/bin/cmake -E cmake_link_script CMakeFiles/cmTC_82dbf.dir/link.txt --verbose=1
+/usr/bin/gcc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_82dbf.dir/CheckFunctionExists.c.o  -o cmTC_82dbf -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [cmTC_82dbf] Error 1
+make[1]: Leaving directory `/home/travis/build/antik9/OtusCpp/tests/CMakeFiles/CMakeTmp'
+make: *** [cmTC_82dbf/fast] Error 2
+
+

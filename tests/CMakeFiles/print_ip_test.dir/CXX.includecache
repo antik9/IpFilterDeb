@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/travis/build/antik9/OtusCpp/src/print_ip.hpp
+iostream
+-
+list
+-
+vector
+-
+tuple
+-
+type_traits
+-
+
+/home/travis/build/antik9/OtusCpp/tests/tests.cpp
+gmock/gmock.h
+-
+gtest/gtest.h
+-
+../src/print_ip.hpp
+/home/travis/build/antik9/OtusCpp/src/print_ip.hpp
+

@@ -2,7 +2,6 @@ language: cpp
 
 before_install:
  - sudo apt-get -qq update
- - sudo apt-get install -y libboost-program-options-dev
  - sudo apt-get install -y libgtest-dev google-mock cmake unzip
  - sudo wget https://github.com/google/googletest/archive/master.zip
  - sudo unzip master.zip && sudo rm -f master.zip
@@ -21,14 +20,26 @@ before_install:
  - cd "${TRAVIS_BUILD_DIR}"
 
 script:
+- cd tests
 - cmake .
 - cmake --build .
 - cmake --build . --target test
+- cd ../src
+- cmake .
+- cmake --build .
 - cmake --build . --target package
+- cd ..
+
 deploy:
-  provider: script
+- provider: script
   skip_cleanup: true
   script:
-  - curl -T ip_filter-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb -uantik9:$BINTRAY_API_KEY "https://api.bintray.com/content/antik9/HelloWorld/ip_filter/$TRAVIS_BUILD_NUMBER/ip_filter-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb;deb_distribution=trusty;deb_component=main;deb_architecture=amd64;publish=1"
+    - curl -T src/print_ip-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb -uantik9:$BINTRAY_API_KEY "https://api.bintray.com/content/antik9/HelloWorld/print_ip/$TRAVIS_BUILD_NUMBER/print_ip-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb;deb_distribution=trusty;deb_component=main;deb_architecture=amd64;publish=1"
   on:
-      branch: master
+      branch: print-ip
+- provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  keep_history: true
+  on:
+      branch: print-ip

@@ -69,7 +69,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Macros</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -86,8 +86,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#define-members">Macros</a> &#124;
-<a href="#func-members">Functions</a>  </div>
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
 <div class="title">print_ip.hpp File Reference</div>  </div>
 </div><!--header-->
@@ -144,22 +144,12 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper struct to print tuple element by element.  <a href="struct____print__tuple_3_010_00_01T_8_8_8_4.html#details">More...</a><br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
-Macros</h2></td></tr>
-<tr class="memitem:a5cd8b22af5187daa3d34709d3b516851"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="print__ip_8hpp.html#a5cd8b22af5187daa3d34709d3b516851">OCTAL</a>&#160;&#160;&#160;8</td></tr>
-<tr class="separator:a5cd8b22af5187daa3d34709d3b516851"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a38154b673bfa485f831b35ccdb447181"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="print__ip_8hpp.html#a38154b673bfa485f831b35ccdb447181">OCTET</a>&#160;&#160;&#160;((1 &lt;&lt; <a class="el" href="print__ip_8hpp.html#a5cd8b22af5187daa3d34709d3b516851">OCTAL</a>) - 1)</td></tr>
-<tr class="separator:a38154b673bfa485f831b35ccdb447181"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:aa0fd436570ce0d34639ce733e87c6cb8"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:aa0fd436570ce0d34639ce733e87c6cb8"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="print__ip_8hpp.html#aa0fd436570ce0d34639ce733e87c6cb8">__print_by_octets</a> (T ip_v, int bytes, bool with_suffix_dot, bool eofline)</td></tr>
-<tr class="memdesc:aa0fd436570ce0d34639ce733e87c6cb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to print integral types representation of ip.  <a href="#aa0fd436570ce0d34639ce733e87c6cb8">More...</a><br/></td></tr>
-<tr class="separator:aa0fd436570ce0d34639ce733e87c6cb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad04e41efabbbc70d94cdb4937b574793"><td class="memTemplParams" colspan="2">template&lt;typename Container &gt; </td></tr>
-<tr class="memitem:ad04e41efabbbc70d94cdb4937b574793"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="print__ip_8hpp.html#ad04e41efabbbc70d94cdb4937b574793">__print_ip_from_container</a> (const Container &amp;ip_v, bool eofline=true)</td></tr>
-<tr class="separator:ad04e41efabbbc70d94cdb4937b574793"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9c2d6d3fd25a3fd3bbaba11964a0943"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ab9c2d6d3fd25a3fd3bbaba11964a0943"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="print__ip_8hpp.html#ab9c2d6d3fd25a3fd3bbaba11964a0943">__print_by_octets</a> (T ip_v, int bytes, bool eofline)</td></tr>
+<tr class="memdesc:ab9c2d6d3fd25a3fd3bbaba11964a0943"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to print integral types representation of ip.  <a href="#ab9c2d6d3fd25a3fd3bbaba11964a0943">More...</a><br/></td></tr>
+<tr class="separator:ab9c2d6d3fd25a3fd3bbaba11964a0943"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a89f2da5cc569070ee722ac42a841de"><td class="memTemplParams" colspan="2">template&lt;typename... T&gt; </td></tr>
 <tr class="memitem:a0a89f2da5cc569070ee722ac42a841de"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="print__ip_8hpp.html#a0a89f2da5cc569070ee722ac42a841de">__print_tuple_args</a> (const std::tuple&lt; T...&gt; &amp;ip_v)</td></tr>
 <tr class="memdesc:a0a89f2da5cc569070ee722ac42a841de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function to print tuple element by element.  <a href="#a0a89f2da5cc569070ee722ac42a841de">More...</a><br/></td></tr>
@@ -189,36 +179,18 @@ void &gt;::type&#160;</td><td class="memTemplItemRight" valign="bottom"><a class
 ::value, void &gt;::type&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="print__ip_8hpp.html#a683e3759ade6c18daad4aa544209d724">print_ip</a> (const std::tuple&lt; T, Ts...&gt; &amp;ip_v, bool eofline=true)</td></tr>
 <tr class="memdesc:a683e3759ade6c18daad4aa544209d724"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function print_ip for std::tuple. Tuple will be printed if only all of its elements have the same type.  <a href="#a683e3759ade6c18daad4aa544209d724">More...</a><br/></td></tr>
 <tr class="separator:a683e3759ade6c18daad4aa544209d724"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a21453a93464e27c00a43136b425e9109"><td class="memItemLeft" align="right" valign="top">const unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="print__ip_8hpp.html#a21453a93464e27c00a43136b425e9109">OCTAL</a> = 8</td></tr>
+<tr class="separator:a21453a93464e27c00a43136b425e9109"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92718f83c3cd4afbcefd387c634b8455"><td class="memItemLeft" align="right" valign="top">const unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="print__ip_8hpp.html#a92718f83c3cd4afbcefd387c634b8455">OCTET</a> = ((1 &lt;&lt; <a class="el" href="print__ip_8hpp.html#a21453a93464e27c00a43136b425e9109">OCTAL</a>) - 1)</td></tr>
+<tr class="separator:a92718f83c3cd4afbcefd387c634b8455"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>module provides templates for printing ip from various sources coming into the function. </p>
-</div><h2 class="groupheader">Macro Definition Documentation</h2>
-<a class="anchor" id="a5cd8b22af5187daa3d34709d3b516851"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define OCTAL&#160;&#160;&#160;8</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a38154b673bfa485f831b35ccdb447181"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define OCTET&#160;&#160;&#160;((1 &lt;&lt; <a class="el" href="print__ip_8hpp.html#a5cd8b22af5187daa3d34709d3b516851">OCTAL</a>) - 1)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<h2 class="groupheader">Function Documentation</h2>
-<a class="anchor" id="aa0fd436570ce0d34639ce733e87c6cb8"></a>
+</div><h2 class="groupheader">Function Documentation</h2>
+<a class="anchor" id="ab9c2d6d3fd25a3fd3bbaba11964a0943"></a>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
@@ -240,12 +212,6 @@ template&lt;typename T &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>with_suffix_dot</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool&#160;</td>
           <td class="paramname"><em>eofline</em>&#160;</td>
         </tr>
         <tr>
@@ -260,39 +226,11 @@ template&lt;typename T &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">ip_v</td><td>char, short, int or long integral type </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bytes</td><td>number of bytes left to print [in] with_suffix_dot shuold be a dot be printed after next number </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bytes</td><td>number of bytes left to print </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">eofline</td><td>bool value to indicate shoule be EOL be printed adter ip </td></tr>
   </table>
   </dd>
 </dl>
-
-</div>
-</div>
-<a class="anchor" id="ad04e41efabbbc70d94cdb4937b574793"></a>
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename Container &gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">void __print_ip_from_container </td>
-          <td>(</td>
-          <td class="paramtype">const Container &amp;&#160;</td>
-          <td class="paramname"><em>ip_v</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>eofline</em> = <code>true</code>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
 
 </div>
 </div>
@@ -485,6 +423,31 @@ template&lt;typename T , typename... Ts&gt; </div>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<h2 class="groupheader">Variable Documentation</h2>
+<a class="anchor" id="a21453a93464e27c00a43136b425e9109"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const unsigned int OCTAL = 8</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a92718f83c3cd4afbcefd387c634b8455"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const unsigned int OCTET = ((1 &lt;&lt; <a class="el" href="print__ip_8hpp.html#a21453a93464e27c00a43136b425e9109">OCTAL</a>) - 1)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>

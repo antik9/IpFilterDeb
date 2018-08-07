@@ -6,8 +6,7 @@ var searchData=
   ['_5f_5fis_5funified_5fpack',['__is_unified_pack',['../struct____is__unified__pack.html',1,'']]],
   ['_5f_5fis_5funified_5fpack_3c_20t_2c_20u_20_3e',['__is_unified_pack&lt; T, U &gt;',['../struct____is__unified__pack_3_01T_00_01U_01_4.html',1,'']]],
   ['_5f_5fis_5funified_5ftuple',['__is_unified_tuple',['../struct____is__unified__tuple.html',1,'']]],
-  ['_5f_5fprint_5fby_5foctets',['__print_by_octets',['../print__ip_8hpp.html#aa0fd436570ce0d34639ce733e87c6cb8',1,'print_ip.hpp']]],
-  ['_5f_5fprint_5fip_5ffrom_5fcontainer',['__print_ip_from_container',['../print__ip_8hpp.html#ad04e41efabbbc70d94cdb4937b574793',1,'print_ip.hpp']]],
+  ['_5f_5fprint_5fby_5foctets',['__print_by_octets',['../print__ip_8hpp.html#ab9c2d6d3fd25a3fd3bbaba11964a0943',1,'print_ip.hpp']]],
   ['_5f_5fprint_5ftuple',['__print_tuple',['../struct____print__tuple.html',1,'']]],
   ['_5f_5fprint_5ftuple_3c_200_2c_20t_2e_2e_2e_3e',['__print_tuple&lt; 0, T...&gt;',['../struct____print__tuple_3_010_00_01T_8_8_8_4.html',1,'']]],
   ['_5f_5fprint_5ftuple_5fargs',['__print_tuple_args',['../print__ip_8hpp.html#a0a89f2da5cc569070ee722ac42a841de',1,'print_ip.hpp']]]

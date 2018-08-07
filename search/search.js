@@ -11,8 +11,7 @@ var indexSectionsWithContent =
   1: "_",
   2: "mp",
   3: "_mop",
-  4: "v",
-  5: "o"
+  4: "ov"
 };
 
 var indexSectionNames =
@@ -21,8 +20,7 @@ var indexSectionNames =
   1: "classes",
   2: "files",
   3: "functions",
-  4: "variables",
-  5: "defines"
+  4: "variables"
 };
 
 function convertToId(search)

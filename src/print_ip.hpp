@@ -9,17 +9,13 @@
 #include <tuple>
 #include <type_traits>
 
-#define OCTAL 8
-#define OCTET ((1 << OCTAL) - 1)
+const unsigned int OCTAL = 8;
+const unsigned int OCTET = ((1 << OCTAL) - 1);
 
 // Forward Declaration 
 template<typename T>
 void
-__print_by_octets(T ip_v, int bytes, bool with_suffix_dot=false, bool eofline=false); 
-
-template<typename Container>
-void
-__print_ip_from_container(const Container& ip_v, bool eofline=true); 
+__print_by_octets(T ip_v, int bytes, bool eofline=false); 
 
 template<typename... T>
 void 
@@ -112,7 +108,7 @@ typename std::enable_if<std::is_integral<T>::value, void>::type
 print_ip(T ip_v, bool eofline=true)
 {
     size_t bytes = sizeof(T);
-    __print_by_octets(ip_v, bytes, false, eofline);
+    __print_by_octets(ip_v, bytes, eofline);
 }
 
 /*!
@@ -140,11 +136,12 @@ template<typename Container>
 typename std::enable_if<__is_container<Container>::value, void>::type
 print_ip(Container ip_v, bool eofline=true)
 {
-    bool with_suffix_dot = false;
+    unsigned int index_of_octet = 0;
+    size_t last_element_index = ip_v.size() - 1;
     for ( auto octet: ip_v ) 
     {
-        std::cout << ( with_suffix_dot ? "." : "" ) << octet;
-        with_suffix_dot = true;
+        bool last_element = ( index_of_octet++ == last_element_index );
+        std::cout << octet << ( last_element ? "" : "." );
     }
 
     if ( eofline ) 
@@ -171,7 +168,6 @@ template<typename T, typename ...Ts>
 typename std::enable_if<__is_unified_tuple<T, Ts...>::value, void>::type
 print_ip(const std::tuple<T, Ts...>& ip_v, bool eofline=true)
 {
-    bool with_suffix_dot = false;
     __print_tuple_args(ip_v);
     if ( eofline ) 
     {
@@ -183,20 +179,20 @@ print_ip(const std::tuple<T, Ts...>& ip_v, bool eofline=true)
  * \brief Helper function to print integral types representation of ip.
  * \param[in] ip_v char, short, int or long integral type
  * \param[in] bytes number of bytes left to print
- * \prarm[in] with_suffix_dot shuold be a dot be printed after next number
  * \param[in] eofline bool value to indicate shoule be EOL be printed adter ip
  */
 template<typename T>
 void
-__print_by_octets(T ip_v, int bytes, bool with_suffix_dot, bool eofline) 
+__print_by_octets(T ip_v, int bytes, bool eofline) 
 {
     if ( not bytes )
     {
         return;
     }
-
-    __print_by_octets(ip_v >> 8, bytes - 1, true, false);
-    std::cout << ((int) ip_v & OCTET) << ( with_suffix_dot ? "." : "" );
+    
+    bool last_element = ( bytes == sizeof(T) );
+    __print_by_octets(ip_v >> 8, bytes - 1, false);
+    std::cout << ((int) ip_v & OCTET) << ( last_element ? "" : "." );
     
     if ( eofline ) 
     {
@@ -234,7 +230,7 @@ __print_tuple<0, T...>
      */
     void operator() (const std::tuple<T...>& ip_v) 
     {
-        bool last_element = 0 == std::tuple_size<std::tuple<T...>>::value - 1;
+        bool last_element = ( 0 == std::tuple_size<std::tuple<T...>>::value - 1 );
         std::cout << std::get<0>(ip_v) << ( last_element ? "" : "." );
     }
 };

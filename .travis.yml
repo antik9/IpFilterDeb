@@ -2,21 +2,14 @@ language: cpp
 
 before_install:
  - sudo apt-get -qq update
- - sudo apt-get install -y libgtest-dev google-mock cmake unzip doxygen
+ - sudo apt-get install -y libgtest-dev -mock cmake unzip 
  - sudo wget https://github.com/google/googletest/archive/master.zip
- - sudo unzip master.zip && sudo rm -f master.zip
- - sudo wget https://github.com/google/googlemock/archive/master.zip
  - sudo unzip master.zip && sudo rm -f master.zip
  - cd googletest-master/googletest
  - sudo cmake -DBUILD_SHARED_LIBS=ON .
  - sudo make
  - sudo cp -a include/gtest /usr/include
  - sudo cp -a libgtest_main.so libgtest.so /usr/lib/
- - cd ../googlemock
- - sudo cmake -DBUILD_SHARED_LIBS=ON .
- - sudo make
- - sudo cp -a include/gmock /usr/include
- - sudo cp -a libgmock_main.so libgmock.so /usr/lib/
  - cd "${TRAVIS_BUILD_DIR}"
 
 script:
@@ -28,20 +21,11 @@ script:
 - cmake .
 - cmake --build .
 - cmake --build . --target package
-- cd ..
-- doxygen Doxyfile
 
 deploy:
 - provider: script
   skip_cleanup: true
   script:
-    - curl -T src/print_ip-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb -uantik9:$BINTRAY_API_KEY "https://api.bintray.com/content/antik9/HelloWorld/print_ip/$TRAVIS_BUILD_NUMBER/print_ip-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb;deb_distribution=trusty;deb_component=main;deb_architecture=amd64;publish=1"
+    - curl -T src/matrix-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb -uantik9:$BINTRAY_API_KEY "https://api.bintray.com/content/antik9/HelloWorld/matrix/$TRAVIS_BUILD_NUMBER/matrix-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb;deb_distribution=trusty;deb_component=main;deb_architecture=amd64;publish=1"
   on:
-      branch: print-ip
-- provider: pages
-  skip-cleanup: true
-  github-token: $GITHUB_TOKEN
-  keep_history: true
-  local_dir: html
-  on:
-      branch: print-ip
+      branch: matrix 

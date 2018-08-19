@@ -6,17 +6,17 @@ else ()
     set (BUILD_NUMBER 1)
 endif()
 
-project(print_ip VERSION 0.0.${BUILD_NUMBER})
+project(matrix VERSION 0.0.${BUILD_NUMBER})
 
-add_executable(print_ip main.cpp)
+add_executable(matrix main.cpp)
 
-set_target_properties(print_ip PROPERTIES
+set_target_properties(matrix PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
     COMPILE_OPTIONS -Wpedantic -Wall -Wextra
 )
 
-install(TARGETS print_ip RUNTIME DESTINATION bin)
+install(TARGETS matrix RUNTIME DESTINATION bin)
 
 set(CPACK_GENERATOR DEB)
 

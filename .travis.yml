@@ -2,7 +2,7 @@ language: cpp
 
 before_install:
  - sudo apt-get -qq update
- - sudo apt-get install -y libgtest-dev -mock cmake unzip 
+ - sudo apt-get install -y libgtest-dev cmake unzip 
  - sudo wget https://github.com/google/googletest/archive/master.zip
  - sudo unzip master.zip && sudo rm -f master.zip
  - cd googletest-master/googletest

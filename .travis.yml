@@ -7,7 +7,7 @@ before_install:
  - sudo apt-get -qq update
  - sudo apt-get install -y g++-5
  - export GXXPATH="`which g++`"
- - sudo rm GXXPATH
+ - sudo rm $GXXPATH
  - sudo ln -s "`which g++-5`" $GXXPATH
  - sudo wget https://github.com/google/googletest/archive/master.zip
  - sudo unzip master.zip && sudo rm -f master.zip

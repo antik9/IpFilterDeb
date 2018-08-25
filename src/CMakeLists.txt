@@ -6,17 +6,23 @@ else ()
     set (BUILD_NUMBER 1)
 endif()
 
-project(matrix VERSION 0.0.${BUILD_NUMBER})
+project(bulk VERSION 0.0.${BUILD_NUMBER})
 
-add_executable(matrix main.cpp)
+add_executable(bulk main.cpp)
 
-set_target_properties(matrix PROPERTIES
+add_library(lib_bulk bulk.cpp)
+
+set_target_properties(bulk lib_bulk PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
     COMPILE_OPTIONS -Wpedantic -Wall -Wextra
 )
 
-install(TARGETS matrix RUNTIME DESTINATION bin)
+target_link_libraries(bulk
+    lib_bulk
+)
+
+install(TARGETS bulk RUNTIME DESTINATION bin)
 
 set(CPACK_GENERATOR DEB)
 

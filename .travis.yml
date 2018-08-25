@@ -19,19 +19,15 @@ before_install:
  - cd "${TRAVIS_BUILD_DIR}"
 
 script:
-- cd tests
 - cmake .
 - cmake --build .
 - cmake --build . --target test
-- cd ../src
-- cmake .
-- cmake --build .
 - cmake --build . --target package
 
 deploy:
 - provider: script
   skip_cleanup: true
   script:
-    - curl -T /home/travis/build/antik9/OtusCpp/src/matrix-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb -uantik9:$BINTRAY_API_KEY "https://api.bintray.com/content/antik9/HelloWorld/matrix/$TRAVIS_BUILD_NUMBER/matrix-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb;deb_distribution=trusty;deb_component=main;deb_architecture=amd64;publish=1"
+    - curl -T /home/travis/build/antik9/OtusCpp/src/bulk-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb -uantik9:$BINTRAY_API_KEY "https://api.bintray.com/content/antik9/HelloWorld/bulk/$TRAVIS_BUILD_NUMBER/bulk-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb;deb_distribution=trusty;deb_component=main;deb_architecture=amd64;publish=1"
   on:
-      branch: matrix 
+      branch: bulk 

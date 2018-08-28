@@ -25,15 +25,9 @@ static const int timezone_diff_seconds = get_time_offset();
  * Definition of BulkExecutor methods
  */
 void
-BulkExecutor::attach ( DefaultFlusher* flusher )
+BulkExecutor::attach ( Flusher* flusher_ptr )
 {
-    default_flusher = static_cast<Flusher*>(flusher);
-}
-
-void
-BulkExecutor::attach ( BlockFlusher* flusher )
-{
-    block_flusher = static_cast<Flusher*>(flusher);
+   flushers_ptrs.emplace_back(flusher_ptr);
 }
 
 void
@@ -43,45 +37,33 @@ BulkExecutor::read_and_execute()
     while ( true )
     {
         std::getline(in, next);
-        if ( in.good() && separators.empty() )
+        bool success = true;
+        if ( in.good() ) 
         {
-            if ( next == NEW_BLOCK_INIT )
+            for ( auto& flusher_ptr: flushers_ptrs )
             {
-                default_flusher->update();
-                separators.push(next);
-            }
-            else if ( next == NEW_BLOCK_CLOSE )
-            {
-                std::cout << "ERROR: Incorrect place of end of sequence" << std::endl;
-                break;
-            }
-            else 
-            {
-                default_flusher->update(next);
-            }
-        }
-        else if ( in.good() && !separators.empty() )
-        {
-            if ( next == NEW_BLOCK_INIT )
-            {
-                separators.push(next);
-            }
-            else if ( next == NEW_BLOCK_CLOSE )
-            {
-                separators.pop();
-                if ( separators.empty() )
+                if ( not ( success = flusher_ptr->update(next) ) )
                 {
-                    block_flusher->update();
+                    std::cout << "ERROR: Incorrect place of end of sequence" << std::endl;
+                    break;
                 }
             }
-            else
-            {
-                block_flusher->update(next);
-            }
         }
-        else
-        {   
-            default_flusher->update();
+        else if ( in.eof() )
+        {
+            for ( auto& flusher_ptr: flushers_ptrs )
+            {
+                flusher_ptr->flush();
+            }
+            break;
+        }
+        else                // Unknown failure
+        {
+            std::cout << "Unknown ERROR" << std::endl;
+            break;
+        }
+        if ( not success )
+        {
             break;
         }
     }
@@ -90,27 +72,17 @@ BulkExecutor::read_and_execute()
 /*
  * Definiton of Flusher methods
  */
-void
-Flusher::update ( std::string command )
-{
-    if ( commands.empty() )
-    {
-        set_filename();
-    }
-    commands.emplace_back(command);
-}
-
-void
-Flusher::update ()
-{
-    flush();
-}
-
 void 
 Flusher::flush ()
 {
     std::stringstream output_sstream;
     int commands_left = commands.size();
+
+    /* Flush if only EOF is correct regarding to block_separators */
+    if ( not block_separators.empty() )
+    {
+        return;
+    }
     
     output_sstream << FLUSH_INIT;
     for ( auto command: commands )
@@ -163,11 +135,13 @@ Flusher::set_filename ()
 	auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(duration);
     duration -= microseconds;
 
+    filename_sstream << "bulk";
     filename_sstream << std::setfill('0') << std::setw(2) << hours.count();
     filename_sstream << std::setfill('0') << std::setw(2) << minutes.count();
     filename_sstream << std::setfill('0') << std::setw(2) << seconds.count();
-    filename_sstream << std::setfill('0') << std::setw(3) 
-        << milliseconds.count() << microseconds.count() / 100 << ".log";
+    filename_sstream << std::setfill('0') << std::setw(3) << milliseconds.count() 
+        << microseconds.count() / 100;
+    filename_sstream << ".log";
     
     this->filename = filename_sstream.str();
 }
@@ -175,18 +149,70 @@ Flusher::set_filename ()
 /*
  * Definition of methods for DefaultFlusher
  */
-void
+bool
 DefaultFlusher::update (std::string command)
 {
-    if ( commands.empty() )
-    {
-        set_filename();
-    }
-    
-    commands.emplace_back(command);
-    
-    if ( commands.size() == buffer_size )
+    if ( command == NEW_BLOCK_INIT )
     {
         flush();
+        block_separators.push(NEW_BLOCK_INIT);
     }
+    else if ( command == NEW_BLOCK_CLOSE && not block_separators.empty() )
+    {
+        block_separators.pop();
+    }
+    else if ( command == NEW_BLOCK_CLOSE )
+    {
+        return false;
+    }
+    else if ( block_separators.empty() )
+    {
+        if ( commands.empty() )
+        {
+            set_filename();
+        }
+    
+        commands.emplace_back(command);
+    
+        if ( commands.size() == buffer_size )
+        {
+            flush();
+        }
+    }
+    return true;
 } 
+
+    
+/*
+ * Definition of methods for BlockFlusher
+ */
+bool
+BlockFlusher::update ( std::string command )
+{
+    if ( command == NEW_BLOCK_INIT )
+    {
+        block_separators.push(NEW_BLOCK_INIT);
+    }
+    else if ( command == NEW_BLOCK_CLOSE && not block_separators.empty() )
+    {
+        block_separators.pop();
+        if ( block_separators.empty() )
+        {
+            flush();
+        }
+    }
+    else if ( command == NEW_BLOCK_CLOSE )
+    {
+        return false;
+    }
+    else if ( not block_separators.empty() )
+    {
+        if ( commands.empty() )
+        {
+            set_filename();
+        }
+        commands.emplace_back(command);
+    }
+    return true;
+}
+

@@ -19,7 +19,7 @@ protected:
         while ( (file_ = readdir (test_dir)) != NULL ) 
         {
             std::string filename = file_->d_name;
-            if ( filename.size() == 14 and 
+            if ( filename.size() == 18 and 
                     log_pattern.compare(filename.substr(filename.size() - 4)) == 0 )
             {
                 std::cout << "rm " << filename << std::endl;
@@ -41,9 +41,11 @@ TEST_F(TestBulk, two_simple_bulks)
         << "dog" << std::endl 
         << "tac" << std::endl;
     
-    BulkExecutor executor(input);
-    DefaultFlusher default_flusher(executor, 2, std::cout);
-    BlockFlusher block_flusher(executor, std::cout);
+    BulkExecutor executor ( input );
+    DefaultFlusher default_flusher( 2, std::cout );
+    BlockFlusher block_flusher( std::cout );
+    executor.attach ( &default_flusher );
+    executor.attach ( &block_flusher );
     executor.read_and_execute();
     
     std::string output = testing::internal::GetCapturedStdout();
@@ -66,9 +68,11 @@ TEST_F(TestBulk, simple_plus_bulk)
         << "rm -rf" << std::endl
         << NEW_BLOCK_CLOSE << std::endl;
     
-    BulkExecutor executor(input);
-    DefaultFlusher default_flusher(executor, 3, std::cout);
-    BlockFlusher block_flusher(executor, std::cout);
+    BulkExecutor executor ( input );
+    DefaultFlusher default_flusher( 3, std::cout );
+    BlockFlusher block_flusher( std::cout );
+    executor.attach ( &default_flusher );
+    executor.attach ( &block_flusher );
     executor.read_and_execute();
     
     std::string output = testing::internal::GetCapturedStdout();
@@ -89,9 +93,11 @@ TEST_F(TestBulk, incorrect_brace)
         << NEW_BLOCK_CLOSE << std::endl
         << "tac" << std::endl;
     
-    BulkExecutor executor(input);
-    DefaultFlusher default_flusher(executor, 10, std::cout);
-    BlockFlusher block_flusher(executor, std::cout);
+    BulkExecutor executor ( input );
+    DefaultFlusher default_flusher( 10, std::cout );
+    BlockFlusher block_flusher( std::cout );
+    executor.attach ( &default_flusher );
+    executor.attach ( &block_flusher );
     executor.read_and_execute();
     
     std::string output = testing::internal::GetCapturedStdout();
@@ -112,9 +118,11 @@ TEST_F(TestBulk, not_ended_block)
         << "yes" << std::endl
         << "tac" << std::endl;
     
-    BulkExecutor executor(input);
-    DefaultFlusher default_flusher(executor, 5, std::cout);
-    BlockFlusher block_flusher(executor, std::cout);
+    BulkExecutor executor ( input );
+    DefaultFlusher default_flusher( 5, std::cout );
+    BlockFlusher block_flusher( std::cout );
+    executor.attach ( &default_flusher );
+    executor.attach ( &block_flusher );
     executor.read_and_execute();
     
     std::string output = testing::internal::GetCapturedStdout();
@@ -135,9 +143,11 @@ TEST_F(TestBulk, empty_block_in_the_middle)
         << NEW_BLOCK_CLOSE << std::endl
         << "tac" << std::endl;
     
-    BulkExecutor executor(input);
-    DefaultFlusher default_flusher(executor, 2, std::cout);
-    BlockFlusher block_flusher(executor, std::cout);
+    BulkExecutor executor ( input );
+    DefaultFlusher default_flusher( 2, std::cout );
+    BlockFlusher block_flusher( std::cout );
+    executor.attach ( &default_flusher );
+    executor.attach ( &block_flusher );
     executor.read_and_execute();
     
     std::string output = testing::internal::GetCapturedStdout();
@@ -165,9 +175,11 @@ TEST_F(TestBulk, nested_blocks)
         << NEW_BLOCK_CLOSE << std::endl
         << NEW_BLOCK_CLOSE << std::endl;
     
-    BulkExecutor executor(input);
-    DefaultFlusher default_flusher(executor, 2, std::cout);
-    BlockFlusher block_flusher(executor, std::cout);
+    BulkExecutor executor ( input );
+    DefaultFlusher default_flusher( 2, std::cout );
+    BlockFlusher block_flusher( std::cout );
+    executor.attach ( &default_flusher );
+    executor.attach ( &block_flusher );
     executor.read_and_execute();
     
     std::string output = testing::internal::GetCapturedStdout();

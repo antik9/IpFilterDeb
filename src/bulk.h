@@ -15,7 +15,6 @@ class DefaultFlusher;
 class BulkExecutor
 {
 public:
-    using stack         = std::stack<std::string>;
 
     BulkExecutor(std::istream& in) : 
         in(in) {};
@@ -23,36 +22,29 @@ public:
     ~BulkExecutor()     = default;
 
     void
-    attach ( BlockFlusher* flusher );
+    attach ( Flusher* flusher_ptr);
 
-    void
-    attach ( DefaultFlusher* flusher );
-    
     void
     read_and_execute (); 
 
 private:
-    Flusher*            block_flusher;
-    Flusher*            default_flusher;
-    std::istream&       in;
-    stack               separators;
+    std::vector<Flusher*>   flushers_ptrs;
+    std::istream&           in;
 };
 
 
 class Flusher
 {
 public:
+    using stack         = std::stack<std::string>;
     using container     = std::vector<std::string>;
     
     Flusher ( std::ostream* out_s ) :
-        out(out_s) {};
+        out(out_s)                  {};
 
-    virtual void 
-    update (std::string);
+    virtual bool 
+    update (std::string)    = 0;
     
-    virtual void 
-    update ();
-
     virtual void 
     flush ();
     
@@ -61,6 +53,7 @@ public:
 
 protected:
     container       commands;
+    stack           block_separators;
     std::string     filename;
     std::ostream*   out;
 };
@@ -69,14 +62,11 @@ protected:
 class DefaultFlusher : public Flusher
 {
 public:
-    DefaultFlusher ( BulkExecutor& executor, size_t buffer_size, std::ostream& out_s ) :
-        buffer_size(buffer_size), Flusher(&out_s)
-    {
-        executor.attach(this);
-    }
-
-    void
-    update (std::string);
+    DefaultFlusher ( size_t buffer_size, std::ostream& out_s )  :
+        buffer_size(buffer_size), Flusher(&out_s)               {};
+    
+    bool 
+    update  (std::string);
 
 private:
     size_t          buffer_size;
@@ -86,9 +76,9 @@ private:
 class BlockFlusher : public Flusher
 {
 public:
-    BlockFlusher ( BulkExecutor& executor, std::ostream& out_s ) :
-        Flusher(&out_s)
-    {
-        executor.attach(this);
-    }
+    BlockFlusher ( std::ostream& out_s )    :
+        Flusher(&out_s)                     {};
+    
+    bool 
+    update  (std::string);
 };

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.2)
 
-find_package(Boost_REQUIRED)
+find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 find_package(GTest)
@@ -22,5 +22,5 @@ if (GTest_FOUND)
 
 	enable_testing()
 
-	add_test(concepts_test)
+	add_test(concepts_test concepts_test)
 endif()

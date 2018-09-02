@@ -248,4 +248,4 @@ namespace concepts
         BOOST_CONCEPT_ASSERT((concepts::BidirectionalIterator<Iter>));
     private:
     };
-};
+}

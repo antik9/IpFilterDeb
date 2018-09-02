@@ -1,36 +1,14 @@
 cmake_minimum_required(VERSION 3.2)
 
-if($ENV{TRAVIS_BUILD_NUMBER}) 
-    set (BUILD_NUMBER $ENV{TRAVIS_BUILD_NUMBER})
-else ()
-    set (BUILD_NUMBER 1)
-endif()
+project(Concepts)
 
-project(bulk VERSION 0.0.${BUILD_NUMBER})
+find_package(Boost REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
 
-add_executable(bulk main.cpp)
+add_executable(Concept_creation Concept_creation.cpp)
 
-add_library(lib_bulk bulk.cpp)
-
-set_target_properties(bulk lib_bulk PROPERTIES
+set_target_properties(Concept_creation PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
     COMPILE_OPTIONS -Wpedantic -Wall -Wextra
 )
-
-target_link_libraries(bulk
-    lib_bulk
-)
-
-install(TARGETS bulk RUNTIME DESTINATION bin)
-
-set(CPACK_GENERATOR DEB)
-
-set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
-set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
-set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
-set(CPACK_PACKAGE_VERSION_PATCH "${PROJECT_VERSION_PATCH}")
-
-set(CPACK_PACKAGE_CONTACT illarionovanton@gmail.com)
-
-include(CPack)

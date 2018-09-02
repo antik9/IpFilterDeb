@@ -1,192 +1,52 @@
+#include <boost/concept_check.hpp>
+
 #include <gtest/gtest.h>
-#include <cstdio>
-#include <dirent.h>
-#include <sstream>
+#include <iterator>
+#include <list>
+#include <queue>
 #include <string>
-#include "../src/bulk.h"
+#include <vector>
+
+#include "../src/concepts.hpp"
 
 
-class TestBulk : public ::testing::Test
+TEST(TestConcept, vector)
 {
-protected:
-    void
-    TearDown()
-    {
-        DIR* test_dir = opendir(".");
-        struct dirent* file_;
-        std::string log_pattern = ".log";
-
-        while ( (file_ = readdir (test_dir)) != NULL ) 
-        {
-            std::string filename = file_->d_name;
-            if ( filename.size() == 18 and 
-                    log_pattern.compare(filename.substr(filename.size() - 4)) == 0 )
-            {
-                std::cout << "rm " << filename << std::endl;
-                std::remove(filename.c_str());
-            }
-        }
-       
-        closedir(test_dir);
-    }   
-};
-
-TEST_F(TestBulk, two_simple_bulks)
-{
-    testing::internal::CaptureStdout();
-    
-    std::stringstream input;
-    input 
-        << "cat" << std::endl 
-        << "dog" << std::endl 
-        << "tac" << std::endl;
-    
-    BulkExecutor executor ( input );
-    DefaultFlusher default_flusher( 2, std::cout );
-    BlockFlusher block_flusher( std::cout );
-    executor.attach ( &default_flusher );
-    executor.attach ( &block_flusher );
-    executor.read_and_execute();
-    
-    std::string output = testing::internal::GetCapturedStdout();
-    ASSERT_EQ( output,
-            "bulk: cat, dog\n"
-            "bulk: tac\n"
-    );
+    BOOST_CONCEPT_ASSERT((
+        concepts::RandomAccessIterator<decltype(std::vector<int>().begin())>
+    ));
 }
 
-TEST_F(TestBulk, simple_plus_bulk)
+/* No match for operator< ... */
+
+// TEST(TestConcept, vector_fiterator)
+// {
+//     BOOST_CONCEPT_ASSERT((
+//         concepts::RandomAccessIterator<std::iterator<std::forward_iterator_tag, int>>
+//     ));
+// }
+
+TEST(TestConcept, deque)
 {
-    testing::internal::CaptureStdout();
-    
-    std::stringstream input;
-    input 
-        << "cat" << std::endl 
-        << "dog" << std::endl
-        << NEW_BLOCK_INIT << std::endl
-        << "tac" << std::endl
-        << "rm -rf" << std::endl
-        << NEW_BLOCK_CLOSE << std::endl;
-    
-    BulkExecutor executor ( input );
-    DefaultFlusher default_flusher( 3, std::cout );
-    BlockFlusher block_flusher( std::cout );
-    executor.attach ( &default_flusher );
-    executor.attach ( &block_flusher );
-    executor.read_and_execute();
-    
-    std::string output = testing::internal::GetCapturedStdout();
-    ASSERT_EQ( output,
-            "bulk: cat, dog\n"
-            "bulk: tac, rm -rf\n"
-    );
+    BOOST_CONCEPT_ASSERT((
+        concepts::RandomAccessIterator<decltype(std::deque<int>().begin())>
+    ));
 }
 
-TEST_F(TestBulk, incorrect_brace)
-{
-    testing::internal::CaptureStdout();
-    
-    std::stringstream input;
-    input 
-        << "cat" << std::endl 
-        << "dog" << std::endl 
-        << NEW_BLOCK_CLOSE << std::endl
-        << "tac" << std::endl;
-    
-    BulkExecutor executor ( input );
-    DefaultFlusher default_flusher( 10, std::cout );
-    BlockFlusher block_flusher( std::cout );
-    executor.attach ( &default_flusher );
-    executor.attach ( &block_flusher );
-    executor.read_and_execute();
-    
-    std::string output = testing::internal::GetCapturedStdout();
-    ASSERT_EQ( output,
-            "ERROR: Incorrect place of end of sequence\n"
-    );
-}
+/* No match for operator< */
 
-TEST_F(TestBulk, not_ended_block)
-{
-    testing::internal::CaptureStdout();
-    
-    std::stringstream input;
-    input 
-        << "cat" << std::endl 
-        << "dog" << std::endl
-        << NEW_BLOCK_INIT << std::endl
-        << "yes" << std::endl
-        << "tac" << std::endl;
-    
-    BulkExecutor executor ( input );
-    DefaultFlusher default_flusher( 5, std::cout );
-    BlockFlusher block_flusher( std::cout );
-    executor.attach ( &default_flusher );
-    executor.attach ( &block_flusher );
-    executor.read_and_execute();
-    
-    std::string output = testing::internal::GetCapturedStdout();
-    ASSERT_EQ( output,
-            "bulk: cat, dog\n"
-    );
-}
+// TEST(TestConcept, list)
+// {
+//     BOOST_CONCEPT_ASSERT((
+//         concepts::RandomAccessIterator<decltype(std::list<int>().begin())>
+//     ));
+// }
 
-TEST_F(TestBulk, empty_block_in_the_middle)
+TEST(TestConcept, string)
 {
-    testing::internal::CaptureStdout();
-    
-    std::stringstream input;
-    input 
-        << "cat" << std::endl 
-        << "dog" << std::endl 
-        << NEW_BLOCK_INIT << std::endl
-        << NEW_BLOCK_CLOSE << std::endl
-        << "tac" << std::endl;
-    
-    BulkExecutor executor ( input );
-    DefaultFlusher default_flusher( 2, std::cout );
-    BlockFlusher block_flusher( std::cout );
-    executor.attach ( &default_flusher );
-    executor.attach ( &block_flusher );
-    executor.read_and_execute();
-    
-    std::string output = testing::internal::GetCapturedStdout();
-    ASSERT_EQ( output,
-            "bulk: cat, dog\n"
-            "bulk: tac\n"
-    );
-}
-
-TEST_F(TestBulk, nested_blocks)
-{
-    testing::internal::CaptureStdout();
-    
-    std::stringstream input;
-    input 
-        << "cat" << std::endl 
-        << "dog" << std::endl 
-        << NEW_BLOCK_INIT << std::endl
-        << "tac" << std::endl
-        << NEW_BLOCK_INIT << std::endl
-        << "open" << std::endl
-        << NEW_BLOCK_INIT << std::endl
-        << "close" << std::endl
-        << NEW_BLOCK_CLOSE << std::endl
-        << NEW_BLOCK_CLOSE << std::endl
-        << NEW_BLOCK_CLOSE << std::endl;
-    
-    BulkExecutor executor ( input );
-    DefaultFlusher default_flusher( 2, std::cout );
-    BlockFlusher block_flusher( std::cout );
-    executor.attach ( &default_flusher );
-    executor.attach ( &block_flusher );
-    executor.read_and_execute();
-    
-    std::string output = testing::internal::GetCapturedStdout();
-    ASSERT_EQ( output,
-            "bulk: cat, dog\n"
-            "bulk: tac, open, close\n"
-    );
+    BOOST_CONCEPT_ASSERT((
+        concepts::RandomAccessIterator<decltype(std::string().begin())>
+    ));
 }
 
 int main(int argc, char *argv[]) {

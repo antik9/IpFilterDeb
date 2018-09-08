@@ -25,10 +25,13 @@ public:
     attach ( Flusher* flusher_ptr);
 
     void
+    detach ( Flusher* flusher_ptr);
+
+    void
     read_and_execute (); 
 
-private:
     std::vector<Flusher*>   flushers_ptrs;
+private:
     std::istream&           in;
 };
 
@@ -41,6 +44,9 @@ public:
     
     Flusher ( std::ostream* out_s ) :
         out(out_s)                  {};
+
+    virtual
+    ~Flusher()              = default;
 
     virtual bool 
     update (std::string)    = 0;
@@ -63,8 +69,8 @@ class DefaultFlusher : public Flusher
 {
 public:
     DefaultFlusher ( size_t buffer_size, std::ostream& out_s )  :
-        buffer_size(buffer_size), Flusher(&out_s)               {};
-    
+        Flusher(&out_s), buffer_size(buffer_size)               {};
+ 
     bool 
     update  (std::string);
 

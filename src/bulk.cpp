@@ -1,7 +1,9 @@
+#include <algorithm>
 #include <chrono>
 #include <fstream>
 #include <iomanip>
 #include <sstream>
+
 #include "bulk.h"
 
 /* 
@@ -28,6 +30,18 @@ void
 BulkExecutor::attach ( Flusher* flusher_ptr )
 {
    flushers_ptrs.emplace_back(flusher_ptr);
+}
+
+void
+BulkExecutor::detach ( Flusher* flusher_ptr )
+{
+    this->flushers_ptrs.erase(
+        std::remove_if(
+            this->flushers_ptrs.begin(),
+            this->flushers_ptrs.end(), 
+            [=] (Flusher* ptr) { return ptr == flusher_ptr; }
+        )
+    );
 }
 
 void
@@ -113,36 +127,9 @@ Flusher::set_filename ()
 	auto duration = now.time_since_epoch();
 	duration += std::chrono::seconds(timezone_diff_seconds);
 	
-	using Days = std::chrono::duration<
-	                int, std::ratio_multiply<std::chrono::hours::period, std::ratio<24>
-	                >::type>;
-
-	Days days = std::chrono::duration_cast<Days>(duration);
-    duration -= days;
-	
-	auto hours = std::chrono::duration_cast<std::chrono::hours>(duration);
-    duration -= hours;
-	
-	auto minutes = std::chrono::duration_cast<std::chrono::minutes>(duration);
-    duration -= minutes;
-	
 	auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration);
-    duration -= seconds;
 	
-	auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
-    duration -= milliseconds;
-	
-	auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(duration);
-    duration -= microseconds;
-
-    filename_sstream << "bulk";
-    filename_sstream << std::setfill('0') << std::setw(2) << hours.count();
-    filename_sstream << std::setfill('0') << std::setw(2) << minutes.count();
-    filename_sstream << std::setfill('0') << std::setw(2) << seconds.count();
-    filename_sstream << std::setfill('0') << std::setw(3) << milliseconds.count() 
-        << microseconds.count() / 100;
-    filename_sstream << ".log";
-    
+    filename_sstream << "bulk" << seconds.count() << ".log";
     this->filename = filename_sstream.str();
 }
 

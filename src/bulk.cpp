@@ -122,13 +122,13 @@ void
 Flusher::set_filename ()
 {
     std::stringstream filename_sstream;
-	
-	std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
-	auto duration = now.time_since_epoch();
-	duration += std::chrono::seconds(timezone_diff_seconds);
-	
-	auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration);
-	
+
+    std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
+    auto duration = now.time_since_epoch();
+    duration += std::chrono::seconds(timezone_diff_seconds);
+
+    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration);
+
     filename_sstream << "bulk" << seconds.count() << ".log";
     this->filename = filename_sstream.str();
 }

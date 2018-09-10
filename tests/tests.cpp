@@ -36,23 +36,19 @@ TEST_F(TestBulk, two_simple_bulks)
 {
     testing::internal::CaptureStdout();
 
-    std::stringstream input;
-    input
-        << "cat" << std::endl
-        << "dog" << std::endl
-        << "tac" << std::endl;
-
-    BulkExecutor executor ( input );
-    DefaultFlusher default_flusher( 2, std::cout );
-    BlockFlusher block_flusher( std::cout );
-    executor.attach ( &default_flusher );
-    executor.attach ( &block_flusher );
-    executor.read_and_execute();
-
+    ConditionFlusher flusher (2, true);
+    flusher.set_ostream(&std::cout);
+    flusher.receive("cat");
+    flusher.receive("dog");
+    flusher.receive("tac");
+    flusher.flush();
+    flusher.print_stats();
+    
     std::string output = testing::internal::GetCapturedStdout();
     ASSERT_EQ( output,
             "bulk: cat, dog\n"
             "bulk: tac\n"
+            "2 blocks, 3 commands\n"
     );
 }
 
@@ -60,164 +56,43 @@ TEST_F(TestBulk, simple_plus_bulk)
 {
     testing::internal::CaptureStdout();
 
-    std::stringstream input;
-    input
-        << "cat" << std::endl
-        << "dog" << std::endl
-        << NEW_BLOCK_INIT << std::endl
-        << "tac" << std::endl
-        << "rm -rf" << std::endl
-        << NEW_BLOCK_CLOSE << std::endl;
-
-    BulkExecutor executor ( input );
-    DefaultFlusher default_flusher( 3, std::cout );
-    BlockFlusher block_flusher( std::cout );
-    executor.attach ( &default_flusher );
-    executor.attach ( &block_flusher );
-    executor.read_and_execute();
+    ConditionFlusher flusher (2, true);
+    flusher.set_ostream(&std::cout);
+    flusher.receive("cat");
+    flusher.receive("dog");
+    flusher.receive(NEW_BLOCK_INIT);
+    flusher.receive("tac");
+    flusher.receive("rm -rf");
+    flusher.receive(NEW_BLOCK_CLOSE);
+    flusher.flush();
+    flusher.print_stats();
 
     std::string output = testing::internal::GetCapturedStdout();
     ASSERT_EQ( output,
             "bulk: cat, dog\n"
             "bulk: tac, rm -rf\n"
+            "2 blocks, 4 commands\n"
     );
 }
-
-TEST_F(TestBulk, incorrect_brace)
+ 
+TEST_F(TestBulk, idle_flusher)
 {
     testing::internal::CaptureStdout();
 
-    std::stringstream input;
-    input
-        << "cat" << std::endl
-        << "dog" << std::endl
-        << NEW_BLOCK_CLOSE << std::endl
-        << "tac" << std::endl;
-
-    BulkExecutor executor ( input );
-    DefaultFlusher default_flusher( 10, std::cout );
-    BlockFlusher block_flusher( std::cout );
-    executor.attach ( &default_flusher );
-    executor.attach ( &block_flusher );
-    executor.read_and_execute();
+    ConditionFlusher flusher (2, true);
+    flusher.receive("cat");
+    flusher.receive("dog");
+    flusher.receive(NEW_BLOCK_INIT);
+    flusher.receive("tac");
+    flusher.flush();
+    flusher.print_stats();
 
     std::string output = testing::internal::GetCapturedStdout();
     ASSERT_EQ( output,
-            "ERROR: Incorrect place of end of sequence\n"
+        "1 blocks, 2 commands\n"
     );
 }
-
-TEST_F(TestBulk, not_ended_block)
-{
-    testing::internal::CaptureStdout();
-
-    std::stringstream input;
-    input
-        << "cat" << std::endl
-        << "dog" << std::endl
-        << NEW_BLOCK_INIT << std::endl
-        << "yes" << std::endl
-        << "tac" << std::endl;
-
-    BulkExecutor executor ( input );
-    DefaultFlusher default_flusher( 5, std::cout );
-    BlockFlusher block_flusher( std::cout );
-    executor.attach ( &default_flusher );
-    executor.attach ( &block_flusher );
-    executor.read_and_execute();
-
-    std::string output = testing::internal::GetCapturedStdout();
-    ASSERT_EQ( output,
-            "bulk: cat, dog\n"
-    );
-}
-
-TEST_F(TestBulk, empty_block_in_the_middle)
-{
-    testing::internal::CaptureStdout();
-
-    std::stringstream input;
-    input
-        << "cat" << std::endl
-        << "dog" << std::endl
-        << NEW_BLOCK_INIT << std::endl
-        << NEW_BLOCK_CLOSE << std::endl
-        << "tac" << std::endl;
-
-    BulkExecutor executor ( input );
-    DefaultFlusher default_flusher( 2, std::cout );
-    BlockFlusher block_flusher( std::cout );
-    executor.attach ( &default_flusher );
-    executor.attach ( &block_flusher );
-    executor.read_and_execute();
-
-    std::string output = testing::internal::GetCapturedStdout();
-    ASSERT_EQ( output,
-            "bulk: cat, dog\n"
-            "bulk: tac\n"
-    );
-}
-
-TEST_F(TestBulk, nested_blocks)
-{
-    testing::internal::CaptureStdout();
-
-    std::stringstream input;
-    input
-        << "cat" << std::endl
-        << "dog" << std::endl
-        << NEW_BLOCK_INIT << std::endl
-        << "tac" << std::endl
-        << NEW_BLOCK_INIT << std::endl
-        << "open" << std::endl
-        << NEW_BLOCK_INIT << std::endl
-        << "close" << std::endl
-        << NEW_BLOCK_CLOSE << std::endl
-        << NEW_BLOCK_CLOSE << std::endl
-        << NEW_BLOCK_CLOSE << std::endl;
-
-    BulkExecutor executor ( input );
-    DefaultFlusher default_flusher( 2, std::cout );
-    BlockFlusher block_flusher( std::cout );
-    executor.attach ( &default_flusher );
-    executor.attach ( &block_flusher );
-    executor.read_and_execute();
-
-    std::string output = testing::internal::GetCapturedStdout();
-    ASSERT_EQ( output,
-            "bulk: cat, dog\n"
-            "bulk: tac, open, close\n"
-    );
-}
-
-
-TEST_F(TestBulk, detach_flusher)
-{
-    testing::internal::CaptureStdout();
-
-    std::stringstream input;
-    input
-        << "cat" << std::endl
-        << "dog" << std::endl
-        << NEW_BLOCK_INIT << std::endl
-        << "tac" << std::endl
-        << "rm -rf" << std::endl
-        << NEW_BLOCK_CLOSE << std::endl;
-
-    BulkExecutor executor ( input );
-    DefaultFlusher default_flusher( 3, std::cout );
-    BlockFlusher block_flusher( std::cout );
-    executor.attach ( &default_flusher );
-    executor.attach ( &block_flusher );
-    executor.detach ( &block_flusher );
-    executor.read_and_execute();
-
-    std::string output = testing::internal::GetCapturedStdout();
-    ASSERT_EQ( output,
-            "bulk: cat, dog\n"
-    );
-}
-
+ 
 
 int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);

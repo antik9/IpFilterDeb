@@ -8,21 +8,22 @@ endif()
 
 project(bulk VERSION 0.0.${BUILD_NUMBER})
 
-add_executable(bulk main.cpp)
+add_executable(bulkmt main.cpp)
 
 add_library(lib_bulk bulk.cpp)
 
-set_target_properties(bulk lib_bulk PROPERTIES
+set_target_properties(bulkmt lib_bulk PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
     COMPILE_OPTIONS -Wpedantic -Wall -Wextra
 )
 
-target_link_libraries(bulk
+target_link_libraries(bulkmt
+    pthread
     lib_bulk
 )
 
-install(TARGETS bulk RUNTIME DESTINATION bin)
+install(TARGETS bulkmt RUNTIME DESTINATION bin)
 
 set(CPACK_GENERATOR DEB)
 

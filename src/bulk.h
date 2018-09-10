@@ -1,5 +1,7 @@
 #pragma once
 #include <iostream>
+#include <mutex>
+#include <queue>
 #include <stack>
 #include <string>
 #include <vector>
@@ -8,83 +10,58 @@ const std::string NEW_BLOCK_INIT    = "{";
 const std::string NEW_BLOCK_CLOSE   = "}";
 const std::string FLUSH_INIT        = "bulk: ";
 
-class Flusher;
-class BlockFlusher;
-class DefaultFlusher;
-
-class BulkExecutor
+struct
+StatsAccumulator
 {
-public:
-
-    BulkExecutor(std::istream& in) : 
-        in(in) {};
-
-    ~BulkExecutor()     = default;
-
+    StatsAccumulator();
     void
-    attach ( Flusher* flusher_ptr);
-
+    incr_blocks();
     void
-    detach ( Flusher* flusher_ptr);
+    incr_commands();
+	void
+	print_stats();
 
-    void
-    read_and_execute (); 
-
-    std::vector<Flusher*>   flushers_ptrs;
 private:
-    std::istream&           in;
+    size_t blocks;
+    size_t commands;
 };
 
-
-class Flusher
+struct
+ConditionFlusher
 {
-public:
     using stack         = std::stack<std::string>;
     using container     = std::vector<std::string>;
+    ConditionFlusher    (int buffer_size, bool is_block);
     
-    Flusher ( std::ostream* out_s ) :
-        out(out_s)                  {};
-
-    virtual
-    ~Flusher()              = default;
-
-    virtual bool 
-    update (std::string)    = 0;
-    
-    virtual void 
+    void
     flush ();
+
+    void
+    print_stats ();
+
+    void
+    receive (std::string message);
+
+    void
+    set_ostream (std::ostream*);
     
-    virtual void
-    set_filename ();
-
-protected:
-    container       commands;
-    stack           block_separators;
-    std::string     filename;
-    std::ostream*   out;
-};
-
-
-class DefaultFlusher : public Flusher
-{
-public:
-    DefaultFlusher ( size_t buffer_size, std::ostream& out_s )  :
-        Flusher(&out_s), buffer_size(buffer_size)               {};
- 
-    bool 
-    update  (std::string);
+    void 
+    set_filename_setter ( std::string (*__set_filename)() );
 
 private:
-    size_t          buffer_size;
+    int                 buffer_size;
+    bool                is_block;
+    container           commands;
+    stack               block_separators;
+    std::ostream*       out;
+    std::string         (*__set_filename) ();
+	std::string			filename;
+    StatsAccumulator    accumulator;
 };
 
+void
+read_and_flush(ConditionFlusher& flusher, std::queue<std::string>& messages, 
+                std::mutex& rw_mutex, std::mutex& off);
 
-class BlockFlusher : public Flusher
-{
-public:
-    BlockFlusher ( std::ostream& out_s )    :
-        Flusher(&out_s)                     {};
-    
-    bool 
-    update  (std::string);
-};
+std::string
+set_filename();

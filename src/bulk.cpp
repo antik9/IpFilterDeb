@@ -172,10 +172,9 @@ read_and_flush(ConditionFlusher& flusher, std::queue<std::string>& messages,
             off.unlock();
             if ( messages.empty() )
             {
-                while ( not rw_mutex.try_lock() ); 
+                std::lock_guard<std::mutex> lock(rw_mutex);
                 flusher.flush();
                 flusher.print_stats();
-                rw_mutex.unlock();
                 return;
             }
         }

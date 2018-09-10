@@ -59,12 +59,11 @@ main(int args, char *argv[])
         if ( std::cin.good() )
         {
             ++lines;
-            rw_mutex.lock();
+            std::lock_guard<std::mutex> lock(rw_mutex);
             logfile_block_q.push(next);
             logfile_buffer_q.push(next);
             logfile_cout_q.push(next);
             idle_flusher.receive(next);
-            rw_mutex.unlock();
         }
         else if ( std::cin.eof() )
         {

@@ -6,7 +6,7 @@ else ()
     set (BUILD_NUMBER 1)
 endif()
 
-project(bulk VERSION 0.0.${BUILD_NUMBER})
+project(bulkmt VERSION 0.0.${BUILD_NUMBER})
 
 add_executable(bulkmt main.cpp)
 

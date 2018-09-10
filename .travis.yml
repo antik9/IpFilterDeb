@@ -28,6 +28,6 @@ deploy:
 - provider: script
   skip_cleanup: true
   script:
-    - curl -T /home/travis/build/antik9/OtusCpp/bulk-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb -uantik9:$BINTRAY_API_KEY "https://api.bintray.com/content/antik9/HelloWorld/bulk/$TRAVIS_BUILD_NUMBER/bulk-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb;deb_distribution=trusty;deb_component=main;deb_architecture=amd64;publish=1"
+    - curl -T /home/travis/build/antik9/OtusCpp/bulkmt-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb -uantik9:$BINTRAY_API_KEY "https://api.bintray.com/content/antik9/HelloWorld/bulkmt/$TRAVIS_BUILD_NUMBER/bulkmt-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb;deb_distribution=trusty;deb_component=main;deb_architecture=amd64;publish=1"
   on:
-      branch: bulk 
+      branch: bulkmt

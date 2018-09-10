@@ -59,7 +59,7 @@ main(int args, char *argv[])
         if ( std::cin.good() )
         {
             ++lines;
-			rw_mutex.lock();
+            rw_mutex.lock();
             logfile_block_q.push(next);
             logfile_buffer_q.push(next);
             logfile_cout_q.push(next);

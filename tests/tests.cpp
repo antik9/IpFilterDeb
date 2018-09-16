@@ -36,7 +36,7 @@ TEST_F(TestBulk, two_simple_bulks)
 {
     testing::internal::CaptureStdout();
 
-    ConditionFlusher flusher (2, true);
+    ConditionFlusher flusher (2, true, "Test");
     flusher.set_ostream(&std::cout);
     flusher.receive("cat");
     flusher.receive("dog");
@@ -48,7 +48,7 @@ TEST_F(TestBulk, two_simple_bulks)
     ASSERT_EQ( output,
             "bulk: cat, dog\n"
             "bulk: tac\n"
-            "2 blocks, 3 commands\n"
+            "Test 2 blocks, 3 commands\n"
     );
 }
 
@@ -56,7 +56,7 @@ TEST_F(TestBulk, simple_plus_bulk)
 {
     testing::internal::CaptureStdout();
 
-    ConditionFlusher flusher (2, true);
+    ConditionFlusher flusher (2, true, "Test");
     flusher.set_ostream(&std::cout);
     flusher.receive("cat");
     flusher.receive("dog");
@@ -71,7 +71,7 @@ TEST_F(TestBulk, simple_plus_bulk)
     ASSERT_EQ( output,
             "bulk: cat, dog\n"
             "bulk: tac, rm -rf\n"
-            "2 blocks, 4 commands\n"
+            "Test 2 blocks, 4 commands\n"
     );
 }
  
@@ -79,7 +79,7 @@ TEST_F(TestBulk, idle_flusher)
 {
     testing::internal::CaptureStdout();
 
-    ConditionFlusher flusher (2, true);
+    ConditionFlusher flusher (2, true, "Test");
     flusher.receive("cat");
     flusher.receive("dog");
     flusher.receive(NEW_BLOCK_INIT);
@@ -89,7 +89,7 @@ TEST_F(TestBulk, idle_flusher)
 
     std::string output = testing::internal::GetCapturedStdout();
     ASSERT_EQ( output,
-        "1 blocks, 2 commands\n"
+        "Test 1 blocks, 2 commands\n"
     );
 }
  

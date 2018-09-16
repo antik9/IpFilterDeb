@@ -13,7 +13,7 @@ const std::string FLUSH_INIT        = "bulk: ";
 struct
 StatsAccumulator
 {
-    StatsAccumulator();
+    StatsAccumulator(std::string name);
     void
     incr_blocks();
     void
@@ -22,6 +22,7 @@ StatsAccumulator
 	print_stats();
 
 private:
+    std::string name;
     size_t blocks;
     size_t commands;
 };
@@ -31,7 +32,7 @@ ConditionFlusher
 {
     using stack         = std::stack<std::string>;
     using container     = std::vector<std::string>;
-    ConditionFlusher    (int buffer_size, bool is_block);
+    ConditionFlusher    (int buffer_size, bool is_block, std::string name);
     
     void
     flush ();

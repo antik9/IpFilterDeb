@@ -3,20 +3,22 @@
 #include <fstream>
 #include <stdexcept>
 #include <sstream>
+#include <thread>
 
 #include "bulk.h"
 
 /*
  * Definition of StatsAccumulator methods
  */
-StatsAccumulator::StatsAccumulator() : blocks(0), commands(0) {}
+StatsAccumulator::StatsAccumulator(std::string name) : name(name), blocks(0), commands(0) {}
 void StatsAccumulator::incr_blocks() 	{ ++blocks; }
 void StatsAccumulator::incr_commands()	{ ++commands; }
 
 void 
 StatsAccumulator::print_stats()	
 { 
-	std::cout 
+	std::cout
+	    << name << " "
 	    << blocks << " blocks, "
 	    << commands << " commands"
 	    << std::endl; 
@@ -25,8 +27,9 @@ StatsAccumulator::print_stats()
 /*
  * Definition of ConditionFlusher methods
  */
-ConditionFlusher::ConditionFlusher ( int buffer_size, bool is_block ) : 
-    buffer_size(buffer_size), is_block(is_block), out(nullptr),  __set_filename(nullptr) {}
+ConditionFlusher::ConditionFlusher ( int buffer_size, bool is_block, std::string name ) : 
+    buffer_size(buffer_size), is_block(is_block), out(nullptr),  __set_filename(nullptr),
+    accumulator(name)   {}
 
 void ConditionFlusher::print_stats () { accumulator.print_stats(); }
 void ConditionFlusher::set_ostream ( std::ostream* out ) { this->out = out; }
@@ -140,7 +143,7 @@ read_and_flush(ConditionFlusher& flusher, std::queue<std::string>& messages,
 {
     while ( true )
     {
-        if ( rw_mutex.try_lock() )
+        if ( not messages.empty() and rw_mutex.try_lock() )
         {
             std::string message;
             /* Try read from queue if there any messages */
@@ -164,6 +167,10 @@ read_and_flush(ConditionFlusher& flusher, std::queue<std::string>& messages,
                     return;
                 }
             }
+        }
+        else
+        {
+            std::this_thread::sleep_for( std::chrono::milliseconds(1) );
         }
 
         /* If `off` mutex is unlocked the thread should exit */

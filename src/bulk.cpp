@@ -5,199 +5,371 @@
 #include <sstream>
 #include <thread>
 
-#include "bulk.h"
+#include "bulk.hpp"
 
 /*
  * Definition of StatsAccumulator methods
  */
-StatsAccumulator::StatsAccumulator(std::string name) : name(name), blocks(0), commands(0) {}
-void StatsAccumulator::incr_blocks() 	{ ++blocks; }
-void StatsAccumulator::incr_commands()	{ ++commands; }
 
-void 
-StatsAccumulator::print_stats()	
-{ 
-	std::cout
-	    << name << " "
-	    << blocks << " blocks, "
-	    << commands << " commands"
-	    << std::endl; 
-}
-
-/*
- * Definition of ConditionFlusher methods
- */
-ConditionFlusher::ConditionFlusher ( int buffer_size, bool is_block, std::string name ) : 
-    buffer_size(buffer_size), is_block(is_block), out(nullptr),  __set_filename(nullptr),
-    accumulator(name)   {}
-
-void ConditionFlusher::print_stats () { accumulator.print_stats(); }
-void ConditionFlusher::set_ostream ( std::ostream* out ) { this->out = out; }
-void 
-ConditionFlusher::set_filename_setter ( std::string (*__set_filename)() ) 
-{ 
-    this->__set_filename = __set_filename; 
-}
-
-void 
-ConditionFlusher::flush()
+void
+StatsAccumulator::accumulate ( std::string key, size_t value )
 {
-    std::stringstream output_sstream;
-    int commands_left = commands.size();
-
-    /* Flush if only EOF is correct regarding to block_separators */
-    if ( not block_separators.empty() )
+    if ( __stats.find(key) == __stats.end() )
     {
-        return;
+        __stats[key] = 0;
     }
-    
-    output_sstream << FLUSH_INIT;
-    for ( auto command: commands )
+    __stats[key] = __stats[key] + value; 
+}
+
+size_t 
+StatsAccumulator::get ( std::string key )
+{
+    if ( __stats.find ( key ) != __stats.end ( ) )
     {
-        accumulator.incr_commands();
-        output_sstream << command << ( commands_left-- > 1 ? ", " : "\n" );
+        return __stats[key];
     }
+    return 0;
+}
 
-    auto output = output_sstream.str();
-
-    if ( output.compare(FLUSH_INIT) )
+std::vector<std::string>
+StatsAccumulator::get_keys ( )
+{
+    std::vector<std::string> keys;
+    for ( auto& key_value: __stats )
     {
-        accumulator.incr_blocks();
-        if ( out )
-        {
-            *out << output;
-        }
-        if ( __set_filename and filename.size() ) 
-        {
-            std::ofstream logfile;
-            logfile.open (filename);
-            logfile << output; 
-            logfile.close();
-            filename.clear();
-        }
+        keys.push_back ( key_value.first );
     }
-
-    commands.clear();
+    return keys;
 }
 
 void
-ConditionFlusher::receive(std::string message) 
+StatsAccumulator::print_stats ( )
+{
+    if ( not prefix.empty() )
+    {
+        std::cout << prefix << ": ";
+    }
+    for ( auto& key_value: __stats )
+    {
+        std::cout << key_value.second << " " << key_value.first << " ";
+    }
+    std::cout << std::endl;
+}
+
+void
+StatsAccumulator::set_prefix ( std::string prefix ) { this->prefix = prefix; };
+
+/*
+ * Definition of StatsAccumulatorWithContent methods
+ */
+Content& StatsAccumulatorWithContent::get_content ( ) { return content; }
+void     StatsAccumulatorWithContent::set_content ( Content& content ) { this->content = content; }
+
+/*
+ * Definition of Sorter methods
+ */
+Sorter::Sorter ( int buffer_size ) : __has_output ( false ), buffer_size ( buffer_size ) { };
+
+bool Sorter::has_output ( ) { return __has_output; }
+
+StatsAccumulatorWithContent
+Sorter::get_output ( ) 
+{
+    if ( __has_output )
+    {
+        __has_output = false;
+    }
+    else
+    {
+        set_output ( );
+    }
+    return output;
+}
+
+void
+Sorter::receive ( std::string message )
 {
     if ( message == NEW_BLOCK_INIT )
     {
-        if ( block_separators.empty() )
+        if ( block_separators.empty ( ) )
         {
-            if ( buffer_size )
-            {
-                flush();
-            }
-            if ( is_block and __set_filename )
-            {
-                filename = __set_filename();
-            }
+            set_output ( );
+            filename = bulkmt::set_filename ( );
         }
+
         block_separators.push(NEW_BLOCK_INIT);
     }
     else if ( message == NEW_BLOCK_CLOSE )
     {
-        if ( block_separators.empty() )
+        if ( block_separators.empty () )
         {
-            throw(std::logic_error("ERROR: Incorrect place of end of sequence"));
+            throw( std::logic_error( "ERROR: Incorrect place of end of sequence" ) );
         }
-        block_separators.pop();
-        if ( is_block and block_separators.empty() )
+
+        block_separators.pop ( );
+
+        if ( block_separators.empty ( ) )
         {
-            flush();
+            set_output ( );
         }
     }
     else if ( block_separators.empty() )
     {
-        if ( buffer_size )
+        if ( commands.empty ( ) )
         {
-            if ( commands.empty() and __set_filename )
-            {
-                filename = __set_filename();
-            }
-    
-            commands.emplace_back(message);
-    
-            if ( commands.size() == buffer_size )
-            {
-                flush();
-            }
+            filename = bulkmt::set_filename();
+        }
+
+        commands.emplace_back ( message );
+ 
+        if ( commands.size ( ) == buffer_size )
+        {
+            set_output ( );
         }
     }
-    else if ( is_block )
+    else 
     {
-        commands.emplace_back(message);
+        commands.emplace_back ( message );
     }
 }
 
+void
+Sorter::set_output ( )
+{
+    if ( commands.empty ( ) )
+    {
+        __has_output = false;
+    }
+    else
+    {
+        std::stringstream   output_sstream;
+        Content             content;
+        output              = StatsAccumulatorWithContent {};
+        int commands_left   = commands.size();
+
+        /* Flush if only EOF is correct regarding to block_separators */
+        if ( not block_separators.empty ( ) )
+        {
+            __has_output = false;
+            return;
+        }
+ 
+        output_sstream << FLUSH_INIT;
+        output.accumulate ( "commands", commands_left );
+
+        for ( auto command: commands )
+        {
+            output_sstream << command << ( commands_left-- > 1 ? ", " : "\n" );
+        }
+
+        content.filename    = filename;
+        content.message     = output_sstream.str ( );
+        output.set_content ( content );
+
+        if ( content.message.compare ( FLUSH_INIT ) )
+        {
+            output.accumulate ( "blocks", 1 );
+            __has_output = true;
+        }
+    }
+    
+    commands.clear ( );
+    filename.clear ( );
+}
+
+/*
+ * Definition of TeePipe methods
+ */
+TeePipe::TeePipe ( ) : sorter_ptr ( nullptr ) { };
+
+void TeePipe::add_handler ( Sorter* sorter_ptr ) { this->sorter_ptr = sorter_ptr; }
+
+void TeePipe::add_output ( TeePipe::ContentQueue* messages ) { outputs.emplace_back ( messages ); }
+
+void
+TeePipe::flush ( )
+{
+    auto content = sorter_ptr->get_output ( );
+    if ( not content.get_content ( ).message.empty ( ) )
+    {
+        for ( auto& output_queue: outputs )
+        {
+            output_queue->push ( content );
+        }
+    }
+}
+
+void
+TeePipe::in ( std::string message )
+{
+    if ( sorter_ptr != nullptr )
+    {
+        if ( sorter_ptr->has_output ( ) )
+        {
+            flush ( );
+        }
+        sorter_ptr->receive ( message );
+    }
+}
+
+/*
+ * Definition of WriterWithAccumulator methods
+ */
+WriterWithAccumulator::WriterWithAccumulator ( ) : accumulator ( nullptr ) {};
+
+WriterWithAccumulator::~WriterWithAccumulator ( ) { print_stats(); }
+
+void
+WriterWithAccumulator::print_stats ( ) 
+{ 
+    if ( accumulator != nullptr )
+    {
+        accumulator->print_stats(); 
+    }
+}
+
+void
+WriterWithAccumulator::set_stats_accumulator ( StatsAccumulator* accumulator )
+{
+    this->accumulator = accumulator;
+}
+
+/*
+ * Definition of FileWriter methods
+ */
+FileWriter::FileWriter ( ) : WriterWithAccumulator ( ) { };
+
+void FileWriter::set_filename ( std::string filename ) { this->filename = filename; }
+
+void 
+FileWriter::write ( StatsAccumulatorWithContent&& accumulator )
+{
+    for ( auto key: this->accumulator->get_keys ( ) )
+    {
+        this->accumulator->accumulate ( key, accumulator.get ( key ) );
+    }
+
+    auto content = accumulator.get_content ( );
+    if ( not content.filename.empty() )
+    {
+        set_filename    ( content.filename );
+        std::ofstream   logfile;
+        logfile.open    ( filename );
+        logfile         << content.message; 
+        logfile.close();
+        filename.clear();
+    }
+}
+
+/*
+ * Definition of StreamWriter methods
+ */
+StreamWriter::StreamWriter ( ) : out ( nullptr ), WriterWithAccumulator ( ) { };
+
+void
+StreamWriter::set_ostream ( std::ostream* out ) { this->out = out; }
+
+void
+StreamWriter::write ( StatsAccumulatorWithContent&& accumulator )
+{
+    for ( auto key: this->accumulator->get_keys ( ) )
+    {
+        this->accumulator->accumulate ( key, accumulator.get ( key ) );
+    }
+
+    auto content = accumulator.get_content();
+    if ( out != nullptr )
+    {
+        std::cout << content.message;
+    }
+}
 
 /*
  * Bulkmt module functions
  */
-void
-read_and_flush(ConditionFlusher& flusher, std::queue<std::string>& messages, 
-                std::mutex& rw_mutex, std::mutex& off)
-{
-    while ( true )
-    {
-        if ( not messages.empty() and rw_mutex.try_lock() )
-        {
-            std::string message;
-            /* Try read from queue if there any messages */
-            if ( not messages.empty() )
-            {
-                message = messages.front();
-                messages.pop();
-            }
-            rw_mutex.unlock();
 
-            /* Perform operations according to condition */
-            if ( not message.empty() )
+namespace bulkmt
+{
+    void
+    read_to_pipe ( TeePipe& tee, LockingQueue<std::string>& messages, std::mutex& off )
+    {
+        while ( true )
+        {
+            if ( not messages.empty ( ) )
             {
                 try
                 {
-                    flusher.receive(message);
+                    messages.lock ( );
+                    if ( not messages.empty ( ) )
+                    {
+                        tee.in ( messages.pop ( ) );
+                    }
+                    messages.unlock ( );
                 }
-                catch (std::logic_error err)
+                catch ( std::logic_error err )
                 {
-                    std::cerr << err.what() << std::endl;
+                    std::cerr << err.what ( ) << std::endl;
                     return;
                 }
             }
-        }
-        else
-        {
-            std::this_thread::sleep_for( std::chrono::milliseconds(1) );
-        }
-
-        /* If `off` mutex is unlocked the thread should exit */
-        if ( off.try_lock() )
-        {
-            off.unlock();
-            if ( messages.empty() )
+            else
             {
-                std::lock_guard<std::mutex> lock(rw_mutex);
-                flusher.flush();
-                flusher.print_stats();
+                std::this_thread::sleep_for( std::chrono::milliseconds ( 1 ) );
+            }
+    
+            /* If `off` mutex is unlocked the thread should exit */
+            if ( messages.empty ( ) and off.try_lock ( ) )
+            {
+                off.unlock ( );
+                tee.flush ( );
                 return;
             }
         }
     }
-}
 
-std::string
-set_filename()
-{
-    std::stringstream filename_sstream;
+    void
+    write ( WriterWithAccumulator& writer,
+            LockingQueue<StatsAccumulatorWithContent>& messages, std::mutex& off )
+    {
+        while ( true )
+        {
+            if ( not messages.empty ( ) )
+            {
+                messages.lock ( );
+                if ( not messages.empty ( ) )
+                {
+                    writer.write ( messages.pop ( ) );
+                }
+                messages.unlock ( );
+            }
+            else
+            {
+                std::this_thread::sleep_for( std::chrono::milliseconds ( 1 ) );
+            }
+    
+            /* If `off` mutex is unlocked the thread should exit */
+            if ( messages.empty ( ) and off.try_lock ( ) )
+            {
+                off.unlock ( );
+                if ( messages.empty ( ) )
+                {
+                    return;
+                }
+            }
+        }
+    }
 
-    std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
-    auto duration = now.time_since_epoch();
-
-    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(duration);
-
-    filename_sstream << "bulk" << microseconds.count() << ".log";
-    return filename_sstream.str();
+    std::string
+    set_filename ( )
+    {
+        std::stringstream filename_sstream;
+    
+        std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
+        auto duration = now.time_since_epoch();
+    
+        auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(duration);
+    
+        filename_sstream << "bulk" << microseconds.count() << ".log";
+        return filename_sstream.str();
+    }
 }

@@ -4,18 +4,11 @@
 #include <string>
 #include <thread>
 
-#include "bulk.h"
+#include "bulk.hpp"
 
 int
 main(int args, char *argv[])
 {
-    std::mutex rw_mutex;
-    std::mutex off;
-    off.lock();
-    std::queue<std::string> logfile_block_q;
-    std::queue<std::string> logfile_buffer_q;
-    std::queue<std::string> logfile_cout_q;
-
     size_t bulk_size;
     if ( args != 2 )
     {
@@ -31,47 +24,73 @@ main(int args, char *argv[])
             exit(1);
         }
     }
-    ConditionFlusher block_to_file_flusher      (0, true, "Block thread");
-    block_to_file_flusher.set_filename_setter   (&set_filename);
-    std::thread write_block_to_file(read_and_flush,
-            std::ref(block_to_file_flusher), std::ref(logfile_block_q),
-            std::ref(rw_mutex), std::ref(off));
 
-    ConditionFlusher buffer_to_file_flusher     (bulk_size, false, "Buffer thread");
-    buffer_to_file_flusher.set_filename_setter  (&set_filename);
-    std::thread write_buffer_to_file(read_and_flush,
-            std::ref(buffer_to_file_flusher), std::ref(logfile_buffer_q),
-            std::ref(rw_mutex), std::ref(off));
+    std::mutex main_mutex;
+    std::mutex pipe_mutex;
+    std::mutex cout_mutex;
+    std::mutex fwrite_mutex;
+    std::mutex pipe_off;
+    std::mutex write_off;
 
-    ConditionFlusher all_to_cout_flusher        (bulk_size, true, "Cout thread");
-    all_to_cout_flusher.set_ostream             (&std::cout);
-    std::thread write_all_to_cout(read_and_flush,
-            std::ref(all_to_cout_flusher), std::ref(logfile_cout_q),
-            std::ref(rw_mutex), std::ref(off));
+    pipe_off.lock();
+    write_off.lock();
+    LockingQueue<std::string>                   pipe_queue      ( pipe_mutex );
+    LockingQueue<StatsAccumulatorWithContent>   main_queue      ( main_mutex );
+    LockingQueue<StatsAccumulatorWithContent>   cout_queue      ( cout_mutex );
+    LockingQueue<StatsAccumulatorWithContent>   fwrite_queue    ( fwrite_mutex );
 
-    ConditionFlusher idle_flusher (bulk_size, true, "");
+    StatsAccumulator main_stats ( "commands", "blocks" );
+    main_stats.set_prefix ( "Main thread" );
+    StatsAccumulator stream_stats ( "commands", "blocks" );
+    stream_stats.set_prefix ( "Cout thread" );
+    StatsAccumulator file_1_stats ( "commands", "blocks" );
+    file_1_stats.set_prefix ( "File 1 thread" );
+    StatsAccumulator file_2_stats ( "commands", "blocks" );
+    file_2_stats.set_prefix ( "File 2 thread" );
+
+    StreamWriter main_writer;
+    main_writer.set_stats_accumulator ( &main_stats );
+    StreamWriter stream_writer;
+    stream_writer.set_ostream( &std::cout );
+    stream_writer.set_stats_accumulator ( &stream_stats );
+    stream_writer.set_stats_accumulator ( &stream_stats );
+    FileWriter   file_writer_1;
+    file_writer_1.set_stats_accumulator ( &file_1_stats );
+    FileWriter   file_writer_2;
+    file_writer_2.set_stats_accumulator ( &file_2_stats );
+    
+    Sorter sorter ( bulk_size );
+
+    TeePipe tee;
+    tee.add_output  ( &main_queue );
+    tee.add_output  ( &cout_queue );
+    tee.add_output  ( &fwrite_queue );
+    tee.add_handler ( &sorter );
+
+    std::thread pipe_in ( bulkmt::read_to_pipe,
+        std::ref ( tee ), std::ref ( pipe_queue ), std::ref ( pipe_off ) );
+    std::thread main_log ( bulkmt::write,
+        std::ref( main_writer ), std::ref( main_queue ), std::ref ( write_off ) );
+    std::thread cout_log ( bulkmt::write,
+        std::ref( stream_writer ), std::ref( cout_queue ), std::ref ( write_off ) );
+    std::thread file_1_log ( bulkmt::write,
+        std::ref( file_writer_1 ), std::ref( fwrite_queue ), std::ref ( write_off ) );
+    std::thread file_2_log ( bulkmt::write,
+        std::ref( file_writer_2 ), std::ref( fwrite_queue ), std::ref ( write_off ) );
 
 	std::string next;
 	size_t lines = 0;
+
     while ( true )
     {
-        std::getline(std::cin, next);
-        if ( std::cin.good() )
+        std::getline( std::cin, next );
+        if ( std::cin.good ( ) )
         {
             ++lines;
-            std::lock_guard<std::mutex> lock(rw_mutex);
-            logfile_block_q.push(next);
-            logfile_buffer_q.push(next);
-            logfile_cout_q.push(next);
-            idle_flusher.receive(next);
+            pipe_queue.push     ( next );
         }
         else if ( std::cin.eof() )
         {
-            rw_mutex.lock();
-            std::cout << "Main thread " << lines << " lines, ";
-            idle_flusher.flush();
-            idle_flusher.print_stats();
-            rw_mutex.unlock();
             break;
         }
         else                // Unknown failure
@@ -80,10 +99,16 @@ main(int args, char *argv[])
             break;
         }
     }
+    
+    main_stats.accumulate ( "lines", lines );
 
-    off.unlock();
-    write_block_to_file.join();
-    write_buffer_to_file.join();
-    write_all_to_cout.join();
+    pipe_off.unlock     ( );
+    pipe_in.join        ( );
+    write_off.unlock    ( );
+    cout_log.join       ( );
+    file_1_log.join     ( );
+    file_2_log.join     ( );
+    main_log.join       ( );
+    
     return 0;
 }

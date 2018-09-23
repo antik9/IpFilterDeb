@@ -18,10 +18,10 @@ StatsAccumulator::accumulate ( std::string key, size_t value )
     {
         __stats[key] = 0;
     }
-    __stats[key] = __stats[key] + value; 
+    __stats[key] = __stats[key] + value;
 }
 
-size_t 
+size_t
 StatsAccumulator::get ( std::string key )
 {
     if ( __stats.find ( key ) != __stats.end ( ) )
@@ -57,7 +57,7 @@ StatsAccumulator::print_stats ( )
 }
 
 void
-StatsAccumulator::set_prefix ( std::string prefix ) { this->prefix = prefix; };
+StatsAccumulator::set_prefix ( std::string prefix ) { this->prefix = prefix; }
 
 /*
  * Definition of StatsAccumulatorWithContent methods
@@ -68,12 +68,12 @@ void     StatsAccumulatorWithContent::set_content ( Content& content ) { this->c
 /*
  * Definition of Sorter methods
  */
-Sorter::Sorter ( int buffer_size ) : __has_output ( false ), buffer_size ( buffer_size ) { };
+Sorter::Sorter ( int buffer_size ) : __has_output ( false ), buffer_size ( buffer_size ) { }
 
 bool Sorter::has_output ( ) { return __has_output; }
 
 StatsAccumulatorWithContent
-Sorter::get_output ( ) 
+Sorter::get_output ( )
 {
     if ( __has_output )
     {
@@ -121,13 +121,13 @@ Sorter::receive ( std::string message )
         }
 
         commands.emplace_back ( message );
- 
+
         if ( commands.size ( ) == buffer_size )
         {
             set_output ( );
         }
     }
-    else 
+    else
     {
         commands.emplace_back ( message );
     }
@@ -153,7 +153,7 @@ Sorter::set_output ( )
             __has_output = false;
             return;
         }
- 
+
         output_sstream << FLUSH_INIT;
         output.accumulate ( "commands", commands_left );
 
@@ -172,7 +172,7 @@ Sorter::set_output ( )
             __has_output = true;
         }
     }
-    
+
     commands.clear ( );
     filename.clear ( );
 }
@@ -180,7 +180,7 @@ Sorter::set_output ( )
 /*
  * Definition of TeePipe methods
  */
-TeePipe::TeePipe ( ) : sorter_ptr ( nullptr ) { };
+TeePipe::TeePipe ( ) : sorter_ptr ( nullptr ) { }
 
 void TeePipe::add_handler ( Sorter* sorter_ptr ) { this->sorter_ptr = sorter_ptr; }
 
@@ -215,16 +215,16 @@ TeePipe::in ( std::string message )
 /*
  * Definition of WriterWithAccumulator methods
  */
-WriterWithAccumulator::WriterWithAccumulator ( ) : accumulator ( nullptr ) {};
+WriterWithAccumulator::WriterWithAccumulator ( ) : accumulator ( nullptr ) { }
 
 WriterWithAccumulator::~WriterWithAccumulator ( ) { print_stats(); }
 
 void
-WriterWithAccumulator::print_stats ( ) 
-{ 
+WriterWithAccumulator::print_stats ( )
+{
     if ( accumulator != nullptr )
     {
-        accumulator->print_stats(); 
+        accumulator->print_stats();
     }
 }
 
@@ -237,16 +237,19 @@ WriterWithAccumulator::set_stats_accumulator ( StatsAccumulator* accumulator )
 /*
  * Definition of FileWriter methods
  */
-FileWriter::FileWriter ( ) : WriterWithAccumulator ( ) { };
+FileWriter::FileWriter ( ) : WriterWithAccumulator ( ) { }
 
 void FileWriter::set_filename ( std::string filename ) { this->filename = filename; }
 
-void 
+void
 FileWriter::write ( StatsAccumulatorWithContent&& accumulator )
 {
-    for ( auto key: this->accumulator->get_keys ( ) )
+    if ( this->accumulator )
     {
-        this->accumulator->accumulate ( key, accumulator.get ( key ) );
+        for ( auto key: this->accumulator->get_keys ( ) )
+        {
+            this->accumulator->accumulate ( key, accumulator.get ( key ) );
+        }
     }
 
     auto content = accumulator.get_content ( );
@@ -255,7 +258,7 @@ FileWriter::write ( StatsAccumulatorWithContent&& accumulator )
         set_filename    ( content.filename );
         std::ofstream   logfile;
         logfile.open    ( filename );
-        logfile         << content.message; 
+        logfile         << content.message;
         logfile.close();
         filename.clear();
     }
@@ -264,7 +267,7 @@ FileWriter::write ( StatsAccumulatorWithContent&& accumulator )
 /*
  * Definition of StreamWriter methods
  */
-StreamWriter::StreamWriter ( ) : out ( nullptr ), WriterWithAccumulator ( ) { };
+StreamWriter::StreamWriter ( ) : WriterWithAccumulator ( ), out ( nullptr ) { }
 
 void
 StreamWriter::set_ostream ( std::ostream* out ) { this->out = out; }
@@ -272,15 +275,96 @@ StreamWriter::set_ostream ( std::ostream* out ) { this->out = out; }
 void
 StreamWriter::write ( StatsAccumulatorWithContent&& accumulator )
 {
-    for ( auto key: this->accumulator->get_keys ( ) )
+    if ( this->accumulator )
     {
-        this->accumulator->accumulate ( key, accumulator.get ( key ) );
+        for ( auto key: this->accumulator->get_keys ( ) )
+        {
+            this->accumulator->accumulate ( key, accumulator.get ( key ) );
+        }
     }
 
     auto content = accumulator.get_content();
     if ( out != nullptr )
     {
         std::cout << content.message;
+    }
+}
+
+/*
+ * Connector methods
+ */
+Connector::Connector        ( size_t bulk_size ) : sorter ( Sorter ( bulk_size ) )
+{
+    stream_writer.set_ostream   ( &std::cout );
+    tee.add_output              ( &cout_queue );
+    tee.add_output              ( &fwrite_queue );
+    tee.add_handler             ( &sorter );
+}
+
+void
+Connector::connect          ( )
+{
+    pipe_off.lock();
+    write_off.lock();
+
+    pipe_in     = std::thread ( bulkmt::read_to_pipe,
+                                std::ref ( tee ), std::ref ( pipe_queue ),
+                                std::ref ( pipe_off ) );
+    cout_log    = std::thread ( bulkmt::write,
+                                std::ref ( stream_writer ), std::ref( cout_queue ),
+                                std::ref ( write_off ) );
+    file_1_log  = std::thread ( bulkmt::write,
+                                std::ref ( file_writer_1 ), std::ref( fwrite_queue ),
+                                std::ref ( write_off ) );
+    file_2_log  = std::thread ( bulkmt::write,
+                                std::ref ( file_writer_2 ), std::ref( fwrite_queue ),
+                                std::ref ( write_off ) );
+}
+
+void
+Connector::disconnect   ( )
+{
+    fraction.clear      ( );
+    pipe_off.unlock     ( );
+    pipe_in.join        ( );
+    write_off.unlock    ( );
+    cout_log.join       ( );
+    file_1_log.join     ( );
+    file_2_log.join     ( );
+}
+
+
+void
+Connector::receive      ( std::string message )
+{
+    ssize_t idx = -1, next_idx;
+
+    if ( not fraction.empty ( ) )
+    {
+        idx = message.find ( '\n' );
+        if ( idx == std::string::npos )
+        {
+            fraction += message;
+            return;
+        }
+        else
+        {
+            fraction += message.substr ( 0, idx );
+            pipe_queue.push ( fraction );
+            fraction.clear ( );
+        }
+    }
+
+    while ( idx + 1 < message.size ( )
+            and ( next_idx = message.find ( '\n', idx + 1 ) ) != std::string::npos )
+    {
+        pipe_queue.push     ( message.substr ( idx + 1, next_idx - idx - 1 ) );
+        idx = next_idx;
+    }
+
+    if ( idx + 1 != message.size ( ) )
+    {
+        fraction = message.substr ( idx + 1 );
     }
 }
 
@@ -316,7 +400,7 @@ namespace bulkmt
             {
                 std::this_thread::sleep_for( std::chrono::milliseconds ( 1 ) );
             }
-    
+
             /* If `off` mutex is unlocked the thread should exit */
             if ( messages.empty ( ) and off.try_lock ( ) )
             {
@@ -326,6 +410,7 @@ namespace bulkmt
             }
         }
     }
+
 
     void
     write ( WriterWithAccumulator& writer,
@@ -346,7 +431,7 @@ namespace bulkmt
             {
                 std::this_thread::sleep_for( std::chrono::milliseconds ( 1 ) );
             }
-    
+
             /* If `off` mutex is unlocked the thread should exit */
             if ( messages.empty ( ) and off.try_lock ( ) )
             {
@@ -363,12 +448,12 @@ namespace bulkmt
     set_filename ( )
     {
         std::stringstream filename_sstream;
-    
+
         std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
         auto duration = now.time_since_epoch();
-    
+
         auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(duration);
-    
+
         filename_sstream << "bulk" << microseconds.count() << ".log";
         return filename_sstream.str();
     }

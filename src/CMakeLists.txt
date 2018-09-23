@@ -1,29 +1,35 @@
 cmake_minimum_required(VERSION 3.2)
 
-if($ENV{TRAVIS_BUILD_NUMBER}) 
+if($ENV{TRAVIS_BUILD_NUMBER})
     set (BUILD_NUMBER $ENV{TRAVIS_BUILD_NUMBER})
 else ()
     set (BUILD_NUMBER 1)
 endif()
 
-project(bulkmt VERSION 0.0.${BUILD_NUMBER})
+project(async)
 
-add_executable(bulkmt main.cpp)
+set(CMAKE_CXX_STANDARD 14)
 
-add_library(lib_bulk bulk.cpp)
+add_library(bulk bulk.cpp)
 
-set_target_properties(bulkmt lib_bulk PROPERTIES
+add_library(async SHARED async.cpp async.h)
+
+set_target_properties(async bulk PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
     COMPILE_OPTIONS -Wpedantic -Wall -Wextra
 )
 
-target_link_libraries(bulkmt
+target_link_libraries(bulk
     pthread
-    lib_bulk
 )
 
-install(TARGETS bulkmt RUNTIME DESTINATION bin)
+target_link_libraries(async
+    pthread
+    bulk
+)
+
+install(TARGETS async RUNTIME DESTINATION lib)
 
 set(CPACK_GENERATOR DEB)
 

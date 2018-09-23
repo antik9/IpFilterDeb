@@ -1,4 +1,6 @@
 test_dir
 *.swp
+*.swo
 *.out
 log
+tmp

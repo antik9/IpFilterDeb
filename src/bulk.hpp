@@ -3,8 +3,10 @@
 #include <map>
 #include <mutex>
 #include <queue>
+#include <sstream>
 #include <stack>
 #include <string>
+#include <thread>
 #include <vector>
 
 const std::string NEW_BLOCK_INIT    = "{";
@@ -52,7 +54,7 @@ StatsAccumulatorWithContent: StatsAccumulator
 {
     template < typename ...Keys >
     StatsAccumulatorWithContent ( Keys... keys ) :
-        StatsAccumulator ( keys... ) { };
+        StatsAccumulator ( keys... ) { }
 
     Content&
     get_content ( );
@@ -68,7 +70,7 @@ template < typename T >
 struct
 LockingQueue
 {
-    LockingQueue ( std::mutex& rw_mutex ) : rw_mutex ( rw_mutex )  { };
+    LockingQueue ( ) = default; 
 
     bool
     empty ( ) { return messages.empty(); }
@@ -96,7 +98,7 @@ LockingQueue
 
 private:
     std::queue<T>   messages;
-    std::mutex&     rw_mutex;
+    std::mutex      rw_mutex;
 };
 
 /* Handler to differentiate buffered and block messages */
@@ -189,13 +191,48 @@ private:
     std::ostream*   out;
 };
 
+struct
+Connector
+{
+    explicit Connector ( size_t bulk_size );
+
+    void
+    connect     ( );
+    void
+    receive     ( std::string message );
+    void
+    disconnect  ( );
+
+private:
+    std::string                                 fraction;
+    std::mutex                                  pipe_off;
+    std::mutex                                  write_off;
+    LockingQueue<std::string>                   pipe_queue;
+    LockingQueue<StatsAccumulatorWithContent>   cout_queue;
+    LockingQueue<StatsAccumulatorWithContent>   fwrite_queue;
+    StreamWriter                                stream_writer;
+    FileWriter                                  file_writer_1;
+    FileWriter                                  file_writer_2;
+    TeePipe                                     tee;
+    Sorter                                      sorter;
+    std::thread                                 pipe_in;
+    std::thread                                 cout_log;
+    std::thread                                 file_1_log;
+    std::thread                                 file_2_log;
+
+    Connector operator= ( const Connector& _ ) = delete;
+    Connector           ( const Connector& _ ) = delete;
+
+};
+
+
 namespace bulkmt
 {
     void
     read_to_pipe    ( TeePipe& tee, LockingQueue<std::string>& messages, std::mutex& off );
 
     void
-    write           ( WriterWithAccumulator& writer, 
+    write           ( WriterWithAccumulator& writer,
                         LockingQueue<StatsAccumulatorWithContent>& messages,
                         std::mutex& off );
 

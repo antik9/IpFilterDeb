@@ -1,5 +1,9 @@
 language: cpp
 
+env:
+  global:
+  - PACKAGE_NAME=async
+
 before_install:
  - sudo apt-get -qq update
  - sudo apt-get install -y libgtest-dev cmake unzip software-properties-common
@@ -28,6 +32,6 @@ deploy:
 - provider: script
   skip_cleanup: true
   script:
-    - curl -T /home/travis/build/antik9/OtusCpp/bulkmt-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb -uantik9:$BINTRAY_API_KEY "https://api.bintray.com/content/antik9/HelloWorld/bulkmt/$TRAVIS_BUILD_NUMBER/bulkmt-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb;deb_distribution=trusty;deb_component=main;deb_architecture=amd64;publish=1"
+    - curl -T /home/travis/build/antik9/OtusCpp/$PACKAGE_NAME-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb -uantik9:$BINTRAY_API_KEY "https://api.bintray.com/content/antik9/HelloWorld/$PACKAGE_NAME/$TRAVIS_BUILD_NUMBER/$PACKAGE_NAME-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb;deb_distribution=trusty;deb_component=main;deb_architecture=amd64;publish=1"
   on:
-      branch: bulkmt
+      branch: libasync

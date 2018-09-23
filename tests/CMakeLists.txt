@@ -4,7 +4,7 @@ find_package(GTest)
 
 if (GTest_FOUND)
 	add_executable(bulk_test tests.cpp)
-    
+
 	set_target_properties(bulk_test PROPERTIES
    	 	CXX_STANDARD 14
     	CXX_STANDARD_REQUIRED ON
@@ -14,7 +14,8 @@ if (GTest_FOUND)
 	target_link_libraries(bulk_test
     	pthread
     	${GTEST_BOTH_LIBRARIES}
-	    lib_bulk
+	    bulk
+	    async
 	)
 
 	enable_testing()

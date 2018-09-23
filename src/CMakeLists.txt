@@ -8,7 +8,7 @@ endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-project(async)
+project(async VERSION 0.0.${BUILD_NUMBER})
 
 set(CMAKE_CXX_STANDARD 14)
 

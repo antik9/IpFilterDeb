@@ -32,7 +32,7 @@ target_link_libraries(async
 )
 
 install(
-    TARGETS async
+    TARGETS async bulk
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
 )

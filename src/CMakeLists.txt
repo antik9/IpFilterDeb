@@ -6,11 +6,13 @@ else ()
     set (BUILD_NUMBER 1)
 endif()
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 project(async)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_library(bulk bulk.cpp)
+add_library(bulk SHARED bulk.cpp bulk.hpp)
 
 add_library(async SHARED async.cpp async.h)
 
@@ -29,7 +31,11 @@ target_link_libraries(async
     bulk
 )
 
-install(TARGETS async RUNTIME DESTINATION lib)
+install(
+    TARGETS async
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+)
 
 set(CPACK_GENERATOR DEB)
 

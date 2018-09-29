@@ -154,7 +154,6 @@ protected:
     }
 };
 
-/*
 void
 __write ( boost::asio::ip::tcp::socket sock, boost::asio::ip::tcp::endpoint& ep,
             std::string buffer, size_t timeout )
@@ -224,7 +223,6 @@ TEST_F ( TestServer, two_clients )
             "bulk: yes, help\n"
     );
 }
-*/
 
 int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);

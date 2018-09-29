@@ -8,7 +8,7 @@
 namespace bulk
 {
     Server::Server  ( unsigned short port, size_t bulk_size ) :
-        port ( port ), handler ( async::connect ( bulk_size ) ), __alive ( false ) { }
+        port ( port ), handler ( async::connect ( bulk_size ) ) { }
 
     Server::~Server ( ) { async::disconnect ( handler ); }
 
@@ -33,7 +33,7 @@ namespace bulk
                 auto sock = boost::asio::ip::tcp::socket ( service );
                 acc.accept ( sock );
                 Session session { std::move ( sock ), std::ref ( handler ) };
-                std::thread ( std::move ( session ) ).detach ( );
+                std::thread ( std::move ( session ) ).join ( );
             }
         }
         /* MAIN branch */

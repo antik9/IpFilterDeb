@@ -6,7 +6,7 @@
 namespace bulk
 {
 
-    struct 
+    struct
     Session {
         Session ( boost::asio::ip::tcp::socket sock, const async::handle_t& handler );
 
@@ -38,6 +38,5 @@ namespace bulk
     private:
         unsigned short  port;
         async::handle_t handler;
-        bool            __alive;
     };
 }

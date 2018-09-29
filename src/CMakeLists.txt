@@ -8,15 +8,19 @@ endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-project(async VERSION 0.0.${BUILD_NUMBER})
+project(bulk_server VERSION 0.0.${BUILD_NUMBER})
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_library(bulk SHARED bulk.cpp bulk.hpp)
+add_executable(bulk_server main.cpp)
 
-add_library(async SHARED async.cpp async.h)
+add_library(bulk bulk.cpp bulk.hpp)
 
-set_target_properties(async bulk PROPERTIES
+add_library(async async.cpp async.h)
+
+add_library(server server.cpp server.h)
+
+set_target_properties(async bulk server PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
     COMPILE_OPTIONS -Wpedantic -Wall -Wextra
@@ -31,10 +35,24 @@ target_link_libraries(async
     bulk
 )
 
+target_link_libraries(server
+    pthread
+    boost_system
+    bulk
+    async
+)
+
+target_link_libraries(bulk_server
+    pthread
+    boost_system
+    bulk
+    async
+    server
+)
+
 install(
-    TARGETS async bulk
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
+    TARGETS bulk_server
+    RUNTIME DESTINATION bin
 )
 
 set(CPACK_GENERATOR DEB)

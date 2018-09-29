@@ -2,9 +2,10 @@
 #include <cstdio>
 #include <dirent.h>
 #include <sstream>
+#include <stdlib.h>
 #include <string>
 #include <thread>
-#include "../src/async.h"
+#include "../src/server.h"
 
 
 class TestBulk : public ::testing::Test
@@ -14,6 +15,7 @@ protected:
     void
     SetUp ( )
     {
+
     }
 
     void
@@ -109,6 +111,122 @@ TEST_F(TestBulk, blocks)
     ASSERT_EQ( output,
             "bulk: cat, dog\n"
             "bulk: tac\n"
+            "bulk: yes, help\n"
+    );
+}
+
+class TestServer: public ::testing::Test
+{
+protected:
+    boost::asio::ip::tcp::endpoint  ep;
+    unsigned short  PORT        = 13095;
+    size_t          BULK_SIZE   = 2;
+
+    void
+    SetUp ( )
+    {
+        ep = boost::asio::ip::tcp::endpoint (
+                boost::asio::ip::address::from_string ( "127.0.0.1" ),
+                PORT
+        );
+    }
+
+    void
+    TearDown ( )
+    {
+        DIR* test_dir = opendir(".");
+        struct dirent* file_;
+        std::string LOG_BEGIN_PATTERN   = "bulk";
+        std::string LOG_END_PATTERN     = ".log";
+
+        while ( (file_ = readdir (test_dir)) != NULL )
+        {
+            std::string filename = file_->d_name;
+            if ( LOG_BEGIN_PATTERN.compare(filename.substr(0, 4)) == 0 &&
+                    LOG_END_PATTERN.compare(filename.substr(filename.size() - 4)) == 0 )
+            {
+                std::cout << "rm " << filename << std::endl;
+                std::remove(filename.c_str());
+            }
+        }
+
+        closedir(test_dir);
+    }
+};
+
+void
+__write ( boost::asio::ip::tcp::socket sock, boost::asio::ip::tcp::endpoint& ep,
+            std::string buffer, size_t timeout )
+{
+    std::this_thread::sleep_for ( std::chrono::milliseconds ( timeout ) );
+    sock.connect ( ep );
+    boost::asio::write ( sock, boost::asio::buffer ( buffer, buffer.size ( ) ) );
+}
+
+void
+__stop_server ( bulk::Server* server_ptr, size_t timeout )
+{
+    std::this_thread::sleep_for ( std::chrono::milliseconds ( timeout ) );
+    server_ptr->~Server ( );
+}
+
+TEST_F ( TestServer, simple_package )
+{
+    setenv("TEST_BULK", "1", 1);
+    testing::internal::CaptureStdout();
+
+    bulk::Server server ( PORT, BULK_SIZE );
+
+    boost::asio::io_service client_1;
+    boost::asio::ip::tcp::socket sock ( client_1 );
+
+    std::thread (
+        __write, std::move ( sock ), std::ref ( ep ),
+        "cat\ndog\ntac\n{\nyes\nhelp\n}\n", 100
+    ).detach ( );
+
+
+    server.serve_forever ( );
+    server.~Server ( );
+
+    std::string output = testing::internal::GetCapturedStdout();
+    ASSERT_EQ( output,
+            "bulk: cat, dog\n"
+            "bulk: tac\n"
+            "bulk: yes, help\n"
+    );
+}
+
+TEST_F ( TestServer, two_clients )
+{
+    setenv("TEST_BULK", "2", 1);
+    testing::internal::CaptureStdout();
+
+    bulk::Server server ( PORT, BULK_SIZE );
+
+    boost::asio::io_service client_1;
+    boost::asio::ip::tcp::socket sock_1 ( client_1 );
+    boost::asio::io_service client_2;
+    boost::asio::ip::tcp::socket sock_2( client_2 );
+
+    std::thread (
+        __write, std::move ( sock_1 ), std::ref ( ep ),
+        "ls\n", 50
+    ).detach ( );
+
+    std::thread (
+        __write, std::move ( sock_2 ), std::ref ( ep ),
+        "cat\ndog\n{\nyes\nhelp\n}\n", 100
+    ).detach ( );
+
+
+    server.serve_forever ( );
+    server.~Server ( );
+
+    std::string output = testing::internal::GetCapturedStdout();
+    ASSERT_EQ( output,
+            "bulk: ls, cat\n"
+            "bulk: dog\n"
             "bulk: yes, help\n"
     );
 }

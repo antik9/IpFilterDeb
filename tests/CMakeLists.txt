@@ -13,9 +13,11 @@ if (GTest_FOUND)
 
 	target_link_libraries(bulk_test
     	pthread
+    	boost_system
     	${GTEST_BOTH_LIBRARIES}
 	    bulk
 	    async
+	    server
 	)
 
 	enable_testing()

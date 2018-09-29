@@ -1,7 +1,9 @@
 #include <iostream>
+#include <stdlib.h>
+#include <string.h>
+
 #include "async.h"
 #include "server.h"
-#include <string.h>
 
 namespace bulk
 {
@@ -21,12 +23,29 @@ namespace bulk
         );
 
         boost::asio::ip::tcp::acceptor acc ( service, ep );
-        while ( true )
+
+        /* TEST branch */
+        auto test_enabled = getenv ( "TEST_BULK" );
+        if ( test_enabled )
         {
-            auto sock = boost::asio::ip::tcp::socket ( service );
-            acc.accept ( sock );
-            Session session { std::move ( sock ), std::ref ( handler ) };
-            std::thread ( std::move ( session ) ).detach ( );
+            for ( int i = 0; i < atoi ( test_enabled ); ++i )
+            {
+                auto sock = boost::asio::ip::tcp::socket ( service );
+                acc.accept ( sock );
+                Session session { std::move ( sock ), std::ref ( handler ) };
+                std::thread ( std::move ( session ) ).detach ( );
+            }
+        }
+        /* MAIN branch */
+        else
+        {
+            while ( true )
+            {
+                auto sock = boost::asio::ip::tcp::socket ( service );
+                acc.accept ( sock );
+                Session session { std::move ( sock ), std::ref ( handler ) };
+                std::thread ( std::move ( session ) ).detach ( );
+            }
         }
     }
 

@@ -175,7 +175,6 @@ TEST_F ( TestServer, simple_package )
     setenv("TEST_BULK", "1", 1);
     testing::internal::CaptureStdout();
 
-    bulk::Server server ( PORT, BULK_SIZE );
 
     boost::asio::io_service client_1;
     boost::asio::ip::tcp::socket sock ( client_1 );
@@ -185,9 +184,10 @@ TEST_F ( TestServer, simple_package )
         "cat\ndog\ntac\n{\nyes\nhelp\n}\n", 100
     ).detach ( );
 
-
-    server.serve_forever ( );
-    server.~Server ( );
+    {
+        bulk::Server server ( PORT, BULK_SIZE );
+        server.serve_forever ( );
+    }
 
     std::string output = testing::internal::GetCapturedStdout();
     ASSERT_EQ( output,
@@ -202,7 +202,6 @@ TEST_F ( TestServer, two_clients )
     setenv("TEST_BULK", "2", 1);
     testing::internal::CaptureStdout();
 
-    bulk::Server server ( PORT, BULK_SIZE );
 
     boost::asio::io_service client_1;
     boost::asio::ip::tcp::socket sock_1 ( client_1 );
@@ -219,9 +218,10 @@ TEST_F ( TestServer, two_clients )
         "cat\ndog\n{\nyes\nhelp\n}\n", 100
     ).detach ( );
 
-
-    server.serve_forever ( );
-    server.~Server ( );
+    {
+        bulk::Server server ( PORT, BULK_SIZE );
+        server.serve_forever ( );
+    }
 
     std::string output = testing::internal::GetCapturedStdout();
     ASSERT_EQ( output,

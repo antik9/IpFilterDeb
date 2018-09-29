@@ -9,9 +9,11 @@
 #include <thread>
 #include <vector>
 
-const std::string NEW_BLOCK_INIT    = "{";
-const std::string NEW_BLOCK_CLOSE   = "}";
-const std::string FLUSH_INIT        = "bulk: ";
+const std::string NEW_BLOCK_INIT        = "{";
+const std::string NEW_BLOCK_CLOSE       = "}";
+const std::string FLUSH_INIT            = "bulk: ";
+const std::string NEW_BLOCK_INIT_EOL    = NEW_BLOCK_INIT + '\n';
+const std::string NEW_BLOCK_CLOSE_EOL   = NEW_BLOCK_CLOSE + '\n';
 
 /* Content to pass information further */
 struct

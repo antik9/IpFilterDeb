@@ -5,8 +5,26 @@
 
 namespace bulk
 {
+
+    struct 
+    Session {
+        Session ( boost::asio::ip::tcp::socket sock, const async::handle_t& handler );
+
+        void
+        operator() ( );
+
+    private:
+        boost::asio::ip::tcp::socket    sock;
+        const async::handle_t&          handler;
+        std::string                     block;
+        std::string                     buffer;
+        char                            data[128];
+        size_t                          block_inits;
+        size_t                          eol_index;
+    };
+
     void
-    client_session ( boost::asio::ip::tcp::socket sock, async::handle_t& handler );
+    client_session ( Session session );
 
     class Server
     {
@@ -16,9 +34,6 @@ namespace bulk
 
         void
         serve_forever   ( );
-
-        void
-        stop            ( );
 
     private:
         unsigned short  port;

@@ -337,7 +337,7 @@ Connector::disconnect   ( )
 void
 Connector::receive      ( std::string message )
 {
-    ssize_t idx = -1, next_idx;
+    ssize_t idx = std::string::npos, next_idx;
 
     if ( not fraction.empty ( ) )
     {

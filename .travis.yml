@@ -25,6 +25,7 @@ before_install:
 script:
 - cmake .
 - cmake --build .
+- ./tests/bulk_test
 - cmake --build . --target test
 - cmake --build . --target package
 

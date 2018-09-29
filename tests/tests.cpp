@@ -163,13 +163,6 @@ __write ( boost::asio::ip::tcp::socket sock, boost::asio::ip::tcp::endpoint& ep,
     boost::asio::write ( sock, boost::asio::buffer ( buffer, buffer.size ( ) ) );
 }
 
-void
-__stop_server ( bulk::Server* server_ptr, size_t timeout )
-{
-    std::this_thread::sleep_for ( std::chrono::milliseconds ( timeout ) );
-    server_ptr->~Server ( );
-}
-
 TEST_F ( TestServer, simple_package )
 {
     setenv("TEST_BULK", "1", 1);
@@ -210,12 +203,12 @@ TEST_F ( TestServer, two_clients )
 
     std::thread (
         __write, std::move ( sock_1 ), std::ref ( ep ),
-        "ls\n", 50
+        "ls\n", 100
     ).detach ( );
 
     std::thread (
         __write, std::move ( sock_2 ), std::ref ( ep ),
-        "cat\ndog\n{\nyes\nhelp\n}\n", 100
+        "cat\ndog\n{\nyes\nhelp\n}\n", 200
     ).detach ( );
 
     {

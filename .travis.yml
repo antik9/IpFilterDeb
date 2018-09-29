@@ -15,7 +15,8 @@ before_install:
    #- export GXXPATH="`which g++`"
    #- sudo rm $GXXPATH
    #- sudo ln -s "`which g++-5`" $GXXPATH
- - cd /usr/src/googletest
+ - find / -type d -name googletest
+ - cd "`find / -type d -name googletest | head -1`"
  - sudo cmake -DBUILD_SHARED_LIBS=ON .
  - sudo make
  - sudo cp -a include/gtest /usr/include

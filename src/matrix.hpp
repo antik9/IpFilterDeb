@@ -34,9 +34,9 @@ public:
         return __values[key];
     }
 
-    using iterator = decltype(std::map<int, Layer>().cbegin());
-    iterator begin() const { return this->__values.cbegin(); }
-    iterator end() const { return this->__values.cend(); }
+    using const_iterator = typename std::map<int, Layer>::const_iterator;
+    const_iterator begin() const { return this->__values.cbegin(); }
+    const_iterator end() const { return this->__values.cend(); }
 
 private:
     std::map<int, Layer>    __values;
@@ -74,9 +74,9 @@ public:
         return __values[key];
     }
 
-    using iterator = decltype(std::map<int, T>().cbegin());
-    iterator begin() const { return this->__values.cbegin(); }
-    iterator end() const { return this->__values.cend(); }
+    using const_iterator = typename std::map<int, T>::const_iterator;
+    const_iterator begin() const { return this->__values.cbegin(); }
+    const_iterator end() const { return this->__values.cend(); }
 
 private:
     std::map<int, T> __values;
@@ -152,7 +152,6 @@ public:
            }
            this->__values.push_back(__stub);
            __move_to_begin();
-           std::cout << "Iterator size: " << __values.size ( ) << std::endl;
         }
 
         IterValue

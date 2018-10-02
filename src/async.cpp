@@ -1,7 +1,12 @@
+#include <memory>
 #include "async.h"
 
 namespace async
 {
+    using ConnectorPtr = std::shared_ptr<Connector>;
+
+    static std::unordered_map<int, ConnectorPtr> __connectors;
+
     handle_t
     connect ( std::size_t bulk )
     {
@@ -9,9 +14,9 @@ namespace async
         {
             if ( __connectors.count ( i ) == 0 )
             {
-                Connector* connector_ptr = new Connector ( bulk );
+                auto connector_ptr = std::make_shared<Connector> ( bulk );
                 connector_ptr->connect ( );
-                __connectors.insert ( std::pair<int, Connector*> ( i, connector_ptr ) );
+                __connectors.insert ( std::pair<int, ConnectorPtr> ( i, connector_ptr ) );
                 return i;
             }
         }
@@ -36,7 +41,6 @@ namespace async
         if ( handle_connection != __connectors.end ( ) )
         {
             handle_connection->second->disconnect ( );
-            delete handle_connection->second;
             __connectors.erase ( handle_connection );
         }
     }

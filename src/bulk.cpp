@@ -2,7 +2,6 @@
 #include <chrono>
 #include <fstream>
 #include <stdexcept>
-#include <sstream>
 #include <thread>
 
 #include "bulk.hpp"
@@ -12,7 +11,7 @@
  */
 
 void
-StatsAccumulator::accumulate ( std::string key, size_t value )
+StatsAccumulator::accumulate ( const std::string& key, size_t value )
 {
     if ( __stats.find(key) == __stats.end() )
     {
@@ -22,7 +21,7 @@ StatsAccumulator::accumulate ( std::string key, size_t value )
 }
 
 size_t
-StatsAccumulator::get ( std::string key )
+StatsAccumulator::get ( const std::string& key )
 {
     if ( __stats.find ( key ) != __stats.end ( ) )
     {
@@ -35,6 +34,7 @@ std::vector<std::string>
 StatsAccumulator::get_keys ( )
 {
     std::vector<std::string> keys;
+    keys.reserve ( __stats.size ( ) );
     for ( auto& key_value: __stats )
     {
         keys.push_back ( key_value.first );
@@ -57,13 +57,13 @@ StatsAccumulator::print_stats ( )
 }
 
 void
-StatsAccumulator::set_prefix ( std::string prefix ) { this->prefix = prefix; }
+StatsAccumulator::set_prefix ( const std::string& prefix ) { this->prefix = prefix; }
 
 /*
  * Definition of StatsAccumulatorWithContent methods
  */
 Content& StatsAccumulatorWithContent::get_content ( ) { return content; }
-void     StatsAccumulatorWithContent::set_content ( Content& content ) { this->content = content; }
+void     StatsAccumulatorWithContent::set_content ( const Content& content ) { this->content = content; }
 
 /*
  * Definition of Sorter methods
@@ -87,7 +87,7 @@ Sorter::get_output ( )
 }
 
 void
-Sorter::receive ( std::string message )
+Sorter::receive ( const std::string& message )
 {
     if ( message == NEW_BLOCK_INIT )
     {
@@ -200,7 +200,7 @@ TeePipe::flush ( )
 }
 
 void
-TeePipe::in ( std::string message )
+TeePipe::in ( const std::string& message )
 {
     if ( sorter_ptr != nullptr )
     {
@@ -239,7 +239,7 @@ WriterWithAccumulator::set_stats_accumulator ( StatsAccumulator* accumulator )
  */
 FileWriter::FileWriter ( ) : WriterWithAccumulator ( ) { }
 
-void FileWriter::set_filename ( std::string filename ) { this->filename = filename; }
+void FileWriter::set_filename ( const std::string& filename ) { this->filename = filename; }
 
 void
 FileWriter::write ( StatsAccumulatorWithContent&& accumulator )
@@ -335,7 +335,7 @@ Connector::disconnect   ( )
 
 
 void
-Connector::receive      ( std::string message )
+Connector::receive      ( const std::string& message )
 {
     ssize_t idx = -1, next_idx;
 
@@ -447,14 +447,10 @@ namespace bulkmt
     std::string
     set_filename ( )
     {
-        std::stringstream filename_sstream;
-
         std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
         auto duration = now.time_since_epoch();
 
         auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(duration);
-
-        filename_sstream << "bulk" << microseconds.count() << ".log";
-        return filename_sstream.str();
+        return "bulk" + std::to_string ( microseconds.count ( ) ) + ".log";
     }
 }

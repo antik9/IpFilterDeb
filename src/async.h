@@ -8,7 +8,6 @@ namespace async
 {
     const size_t MAX_CONNECTIONS = 100;
     using handle_t = int;
-    static std::unordered_map<int, Connector*> __connectors;
 
     handle_t
     connect     ( std::size_t bulk );

@@ -33,15 +33,15 @@ StatsAccumulator
     }
 
     void
-    accumulate          ( std::string key, size_t value );
+    accumulate          ( const std::string& key, size_t value );
     size_t
-    get                 ( std::string key );
+    get                 ( const std::string& key );
     std::vector<std::string>
     get_keys            ( );
 	virtual void
 	print_stats         ( );
 	void
-	set_prefix          ( std::string prefix );
+	set_prefix          ( const std::string& prefix );
 
 protected:
     std::string                     prefix;
@@ -59,7 +59,7 @@ StatsAccumulatorWithContent: StatsAccumulator
     Content&
     get_content ( );
     void
-    set_content ( Content& content );
+    set_content ( const Content& content );
 
 private:
     Content     content;
@@ -87,7 +87,7 @@ LockingQueue
     }
 
     void
-    push ( T message )
+    push ( const T& message )
     {
         std::lock_guard<std::mutex> _lock ( rw_mutex );
         messages.push ( message );
@@ -114,7 +114,7 @@ Sorter
     StatsAccumulatorWithContent
     get_output  ( );
     void
-    receive     ( std::string message );
+    receive     ( const std::string& message );
 
 private:
     bool                        __has_output;
@@ -142,7 +142,7 @@ TeePipe
     void
     flush           ( );
     void
-    in              ( std::string message );
+    in              ( const std::string& message );
 private:
     std::vector<ContentQueue*>  outputs;
     Sorter*                     sorter_ptr;
@@ -172,7 +172,7 @@ FileWriter : public WriterWithAccumulator
 {
     FileWriter      ( );
     void
-    set_filename    ( std::string filename );
+    set_filename    ( const std::string& filename );
     void
     write           ( StatsAccumulatorWithContent&& accumulator );
 private:
@@ -199,7 +199,7 @@ Connector
     void
     connect     ( );
     void
-    receive     ( std::string message );
+    receive     ( const std::string& message );
     void
     disconnect  ( );
 

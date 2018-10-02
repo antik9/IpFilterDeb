@@ -19,7 +19,7 @@ before_install:
  - sudo cmake -DBUILD_SHARED_LIBS=ON .
  - sudo make
  - sudo cp -a include/gtest /usr/include
- - sudo cp -a libgtest_main.so libgtest.so /usr/lib/
+ - sudo cp -a "`find . -name libgtest_main.so`" "`find . -name libgtest.so`" /usr/lib/
  - cd "${TRAVIS_BUILD_DIR}"
 
 script:

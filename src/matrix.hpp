@@ -7,8 +7,8 @@
 /*
  * Struct which wrap std::map for all operations. Neeeded to obtain default value operations.
  */
-template <typename Layer, typename T, T default_v>
-struct MapWrapper
+template <typename Layer>
+struct MapWrapperLayer
 {
 public:
 
@@ -44,7 +44,7 @@ private:
 };
 
 template <typename T, T default_v>
-struct MapWrapper<T, T, default_v>
+struct MapWrapper
 {
 public:
 
@@ -90,14 +90,14 @@ private:
 template <typename T, T default_v, int dimensions>
 struct MatrixMapTypeWrapper
 {
-    using type  = MapWrapper<
-        typename MatrixMapTypeWrapper<T, default_v, dimensions - 1>::type, T, default_v>;
+    using type  = MapWrapperLayer<
+        typename MatrixMapTypeWrapper<T, default_v, dimensions - 1>::type>;
 };
 
 template <typename T, T default_v>
 struct MatrixMapTypeWrapper<T, default_v, 0>
 {
-    using type  = MapWrapper<T, T, default_v>;
+    using type  = MapWrapper<T, default_v>;
 };
 
 /*

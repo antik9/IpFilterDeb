@@ -30,7 +30,7 @@ namespace async
         auto handle_connection = __connectors.find ( handle );
         if ( handle_connection != __connectors.end ( ) )
         {
-            handle_connection->second->receive ( std::string ( data ) );
+            handle_connection->second->receive ( std::move ( std::string { data, size } ) );
         }
     }
 

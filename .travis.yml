@@ -14,8 +14,8 @@ before_install:
  - sudo rm $GXXPATH
  - sudo ln -s "`which g++-5`" $GXXPATH
  - sudo wget https://github.com/google/googletest/archive/release-1.8.1.zip
- - sudo unzip master.zip && sudo rm -f master.zip
- - cd googletest-master/googletest
+ - sudo unzip release-1.8.1.zip && sudo rm -f release-1.8.1.zip
+ - cd googletest-release-1.8.1/googletest
  - sudo cmake -DBUILD_SHARED_LIBS=ON .
  - sudo make
  - sudo cp -a include/gtest /usr/include

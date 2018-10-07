@@ -1,5 +1,18 @@
+#include <csignal>
 #include <iostream>
 #include "server.h"
+
+bulk::Server* server_ptr = nullptr;
+
+void
+signalHandler ( int signum )
+{
+    if ( server_ptr )
+    {
+        server_ptr->~Server ( );
+    }
+    exit(signum);
+}
 
 int
 main ( int argc, char **argv )
@@ -22,6 +35,9 @@ main ( int argc, char **argv )
     if ( ::fork ( ) == 0 )
     {
         bulk::Server server ( port, bulk_size );
+        signal ( SIGINT, signalHandler );
+        signal ( SIGTERM, signalHandler );
+        server_ptr = &server;
         server.serve_forever ( );
     }
 

@@ -8,50 +8,39 @@ endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-project(bulk_server VERSION 0.0.${BUILD_NUMBER})
+project(join_server VERSION 0.0.${BUILD_NUMBER})
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(bulk_server main.cpp)
+add_executable(join_server main.cpp)
 
-add_library(bulk bulk.cpp bulk.hpp)
-
-add_library(async async.cpp async.h)
+add_library(join join.cpp join.hpp)
 
 add_library(server server.cpp server.h)
 
-set_target_properties(async bulk server PROPERTIES
+set_target_properties(join_server join server PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
     COMPILE_OPTIONS -Wpedantic -Wall -Wextra
 )
 
-target_link_libraries(bulk
-    pthread
-)
-
-target_link_libraries(async
-    pthread
-    bulk
-)
-
 target_link_libraries(server
     pthread
     boost_system
-    bulk
-    async
+    boost_thread
+    join
 )
 
-target_link_libraries(bulk_server
+target_link_libraries(join_server
     pthread
     boost_system
-    bulk
-    async
+    boost_thread
+    join
     server
 )
 
 install(
-    TARGETS bulk_server
+    TARGETS join_server
     RUNTIME DESTINATION bin
 )
 

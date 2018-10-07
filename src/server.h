@@ -1,26 +1,25 @@
 #pragma once
 
 #include <boost/asio.hpp>
-#include "async.h"
+#include "join.h"
 
-namespace bulk
+namespace join 
 {
 
     struct
     Session {
-        Session ( boost::asio::ip::tcp::socket sock, const async::handle_t& handler );
+        Session ( boost::asio::ip::tcp::socket sock, Database* database_ptr );
 
         void
         operator() ( );
 
     private:
         boost::asio::ip::tcp::socket    sock;
-        const async::handle_t&          handler;
-        std::string                     block;
-        std::string                     buffer;
+        Database*                       database_ptr;
+        std::stringstream               buffer;
+        std::string                     command;
+        std::string                     command_args;
         char                            data[128];
-        size_t                          block_inits;
-        size_t                          eol_index;
     };
 
     void
@@ -29,14 +28,13 @@ namespace bulk
     class Server
     {
     public:
-        Server          ( unsigned short port, size_t bulk_size );
-        ~Server         ( );
+        Server          ( unsigned short port );
 
         void
         serve_forever   ( );
 
     private:
         unsigned short  port;
-        async::handle_t handler;
+        Database database;
     };
 }

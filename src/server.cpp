@@ -1,16 +1,13 @@
 #include <iostream>
-#include <stdlib.h>
+#include <sstream>
 #include <string.h>
 
-#include "async.h"
 #include "server.h"
 
-namespace bulk
+namespace join
 {
-    Server::Server  ( unsigned short port, size_t bulk_size ) :
-        port ( port ), handler ( async::connect ( bulk_size ) ) { }
 
-    Server::~Server ( ) { async::disconnect ( handler ); }
+    Server::Server  ( unsigned short port ) : port ( port ) { }
 
     void
     Server::serve_forever   ( )
@@ -24,33 +21,17 @@ namespace bulk
 
         boost::asio::ip::tcp::acceptor acc ( service, ep );
 
-        /* TEST branch */
-        auto test_enabled = getenv ( "TEST_BULK" );
-        if ( test_enabled )
+        while ( true )
         {
-            for ( int i = 0; i < atoi ( test_enabled ); ++i )
-            {
-                auto sock = boost::asio::ip::tcp::socket ( service );
-                acc.accept ( sock );
-                Session session { std::move ( sock ), std::ref ( handler ) };
-                std::thread ( std::move ( session ) ).join ( );
-            }
-        }
-        /* MAIN branch */
-        else
-        {
-            while ( true )
-            {
-                auto sock = boost::asio::ip::tcp::socket ( service );
-                acc.accept ( sock );
-                Session session { std::move ( sock ), std::ref ( handler ) };
-                std::thread ( std::move ( session ) ).detach ( );
-            }
+            auto sock = boost::asio::ip::tcp::socket ( service );
+            acc.accept ( sock );
+            Session session { std::move ( sock ), &database };
+            std::thread ( std::move ( session ) ).detach ( );
         }
     }
 
-    Session::Session ( boost::asio::ip::tcp::socket sock, const async::handle_t& handler ) :
-        sock ( std::move ( sock ) ), handler ( handler ), block_inits ( 0 ) { }
+    Session::Session ( boost::asio::ip::tcp::socket sock, Database* database_ptr ) :
+        sock ( std::move ( sock ) ), database_ptr ( database_ptr ) { }
 
     void
     Session::operator() ( )
@@ -59,42 +40,61 @@ namespace bulk
             try {
                 std::memset ( data, '\0', 128);
                 sock.read_some( boost::asio::buffer ( data ) );
-                buffer += data;
-                auto carriage_return_it = std::remove_if ( buffer.begin ( ), buffer.end ( ),
-                                            [] ( char ch ) { return ch == '\r'; } );
-                buffer.erase ( carriage_return_it, buffer.end ( ) );
+                buffer << data;
 
-                while ( ( eol_index = buffer.find ( '\n' ) ) != std::string::npos )
+                for ( int i = 0; i < 128; ++i )
                 {
-                    if ( buffer.size ( ) > 1 and buffer.substr ( 0, 2 ) == NEW_BLOCK_INIT_EOL )
+                    if ( data[i] == '\n' )
                     {
-                        ++block_inits;
-                        block += NEW_BLOCK_INIT_EOL;
-                    }
-                    else if ( buffer.size ( ) > 1 and buffer.substr ( 0, 2 ) == NEW_BLOCK_CLOSE_EOL )
-                    {
-                        --block_inits;
-                        block += NEW_BLOCK_CLOSE_EOL;
-                        if ( block_inits == 0 and not block.empty ( ) )
+                        buffer >> command;
+                        std::getline ( buffer, command_args );
+
+                        /* Telnet \r replace */
+                        int carriage_return;
+                        if ( ( carriage_return = command_args.find ('\r' ) ) != std::string::npos )
                         {
-                            async::receive ( handler, block.c_str ( ), block.size ( ) );
-                            block.clear ( );
+                            command_args.replace ( carriage_return, 1, "" );
+                        }
+
+                        int idx = 0;
+                        while ( idx < command_args.size ( )
+                                and command_args[idx] == join::SPACE_SEPARATOR )
+                        {
+                            ++idx;
+                        }
+
+                        command_args = command_args.substr ( idx );
+                        if ( command == "INSERT" )
+                        {
+                            sock.write_some(
+                                boost::asio::buffer ( database_ptr->insert ( command_args ) ) );
+                        }
+                        else if ( command == "TRUNCATE" )
+                        {
+                            sock.write_some(
+                                boost::asio::buffer ( database_ptr->truncate ( command_args ) ) );
+                        }
+                        else if ( command == "INTERSECTION" )
+                        {
+                            sock.write_some(
+                                boost::asio::buffer ( database_ptr->inner_join ( ) ) );
+                        }
+                        else if ( command == "SYMMETRIC_DIFFERENCE" )
+                        {
+                            sock.write_some(
+                                boost::asio::buffer ( database_ptr->anti_join ( ) ) );
+                        }
+                        else
+                        {
+                            sock.write_some(
+                                boost::asio::buffer ( "Unknown command\n" ) );
                         }
                     }
-                    else if ( block_inits )
-                    {
-                        block += buffer.substr ( 0, eol_index + 1 );
-                    }
-                    else
-                    {
-                        async::receive (
-                                handler, buffer.substr ( 0, eol_index + 1 ).c_str ( ),
-                                eol_index + 1 );
-                    }
-                    buffer = buffer.substr ( eol_index + 1 );
+
                 }
             }
             catch ( const std::exception &e ) {
+                sock.write_some ( boost::asio::buffer ( "UNKNOWN ERROR\n" ) );
                 break;
             }
        }

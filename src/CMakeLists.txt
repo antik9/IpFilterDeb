@@ -14,7 +14,7 @@ set(CMAKE_CXX_STANDARD 14)
 
 add_executable(join_server main.cpp)
 
-add_library(join join.cpp join.hpp)
+add_library(join join.cpp join.h)
 
 add_library(server server.cpp server.h)
 

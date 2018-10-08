@@ -1,4 +1,5 @@
 test_dir
+tests/
 *.swp
 *.swo
 *.out

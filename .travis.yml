@@ -4,7 +4,7 @@ dist: trusty
 
 env:
   global:
-  - PACKAGE_NAME=bulk_server
+  - PACKAGE_NAME=join_server
 
 before_install:
  - sudo apt-get -qq update
@@ -27,7 +27,7 @@ before_install:
 script:
 - cmake .
 - cmake --build .
-- cmake --build . --target test
+  #- cmake --build . --target test
 - cmake --build . --target package
 
 deploy:
@@ -36,4 +36,4 @@ deploy:
   script:
     - curl -T /home/travis/build/antik9/OtusCpp/$PACKAGE_NAME-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb -uantik9:$BINTRAY_API_KEY "https://api.bintray.com/content/antik9/HelloWorld/$PACKAGE_NAME/$TRAVIS_BUILD_NUMBER/$PACKAGE_NAME-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb;deb_distribution=trusty;deb_component=main;deb_architecture=amd64;publish=1"
   on:
-      branch: bulk-server
+      branch: join-server

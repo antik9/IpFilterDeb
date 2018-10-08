@@ -8,44 +8,49 @@ namespace join
     Database::insert    ( const std::string& command )
     {
         int separator_idx = 0, start_idx = 0;
-        
-        if ( next_pos ( start_idx, separator_idx, command ) == INCORRECT_SYNTAX ) 
+
+        if ( next_pos ( start_idx, separator_idx, command ) == INCORRECT_SYNTAX )
         {
             return std::string ( "Check Syntax\n" );
         }
-        
-        std::string table_name = command.substr ( 0, 1 );
-        
+
+        std::string table_name = command.substr ( 0, separator_idx );
+
         if ( separator_idx != 1 or ( table_name != TABLE_A_NAME and table_name != TABLE_B_NAME ) )
         {
-            return std::string ( "Incorrect table name\n" );
+            return std::string ( "Incorrect table name " + table_name + "\n" );
         }
 
-        if ( next_pos ( start_idx, separator_idx, command ) == INCORRECT_SYNTAX ) 
+        if ( next_pos ( start_idx, separator_idx, command ) == INCORRECT_SYNTAX )
         {
             return std::string ( "Check Syntax\n" );
         }
 
-        unsigned int id = std::atoi ( 
+        unsigned int id = std::atoi (
                             command.substr ( start_idx, separator_idx - start_idx ).c_str ( ) );
-        
+
         start_idx = separator_idx + 1;
         if ( ( separator_idx = command.find ( SPACE_SEPARATOR, start_idx ) ) != std::string::npos )
         {
-            return std::string ( "Check Syntax\n" ); 
+            return std::string ( "Check Syntax\n" );
         }
-        
+
         std::string name            = command.substr ( start_idx );
+        if ( name[name.size ( ) - 1] == '\n' )
+        {
+            name = name.substr ( 0, name.size ( ) - 1 );
+        }
+
         Table& update_table         = table_name == TABLE_A_NAME ? A : B;
         Lock&  update_table_lock    = table_name == TABLE_A_NAME ? lock_A : lock_B;
-        
+
         {
             WriteLock w_lock ( update_table_lock );
             if ( update_table.find ( id ) != update_table.end ( ) )
             {
                 return std::string ( "ERR duplicate " + std::to_string ( id ) + "\n" );
             }
-            update_table.insert ( std::pair<int, std::string> { id, name } );  
+            update_table.insert ( std::pair<int, std::string> { id, name } );
         }
 
         return std::string ( "OK\n" );

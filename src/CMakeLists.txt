@@ -6,7 +6,7 @@ else ()
     set (BUILD_NUMBER 1)
 endif()
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+enable_language(CXX)
 
 project(join_server VERSION 0.0.${BUILD_NUMBER})
 
@@ -25,18 +25,13 @@ set_target_properties(join_server join server PROPERTIES
 )
 
 target_link_libraries(server
-    pthread
-    boost_system
-    boost_thread
     join
 )
 
 target_link_libraries(join_server
-    pthread
-    boost_system
-    boost_thread
     join
     server
+    Boost::thread
 )
 
 install(

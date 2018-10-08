@@ -15,19 +15,19 @@ before_install:
  - export GXXPATH="`which g++`"
  - sudo rm $GXXPATH
  - sudo ln -s "`which g++-5`" $GXXPATH
-   # - sudo wget https://github.com/google/googletest/archive/release-1.8.1.zip
-   # - sudo unzip release-1.8.1.zip && sudo rm -f release-1.8.1.zip
-   # - cd googletest-release-1.8.1/googletest
-   # - sudo cmake -DBUILD_SHARED_LIBS=ON .
-   # - sudo make
-   # - sudo cp -a include/gtest /usr/include
-   # - sudo cp -a libgtest_main.so libgtest.so /usr/lib/
+ - sudo wget https://github.com/google/googletest/archive/release-1.8.1.zip
+ - sudo unzip release-1.8.1.zip && sudo rm -f release-1.8.1.zip
+ - cd googletest-release-1.8.1/googletest
+ - sudo cmake -DBUILD_SHARED_LIBS=ON .
+ - sudo make
+ - sudo cp -a include/gtest /usr/include
+ - sudo cp -a libgtest_main.so libgtest.so /usr/lib/
  - cd "${TRAVIS_BUILD_DIR}"
 
 script:
 - cmake .
 - cmake --build .
-  #- cmake --build . --target test
+- cmake --build . --target test
 - cmake --build . --target package
 
 deploy:

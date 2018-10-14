@@ -6,7 +6,7 @@
 #include <thread>
 #include <vector>
 
-#include "mappers.h"
+#include "map_reduce.h"
 
 using namespace std::experimental::filesystem;
 

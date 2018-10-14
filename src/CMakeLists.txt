@@ -8,34 +8,28 @@ endif()
 
 enable_language(CXX)
 
-project(join_server VERSION 0.0.${BUILD_NUMBER})
+project(yamr VERSION 0.0.${BUILD_NUMBER})
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(join_server main.cpp)
+add_executable(yamr main.cpp)
 
-add_library(join join.cpp join.h)
+add_library(map_reduce map_reduce.cpp map_reduce.h)
 
-add_library(server server.cpp server.h)
-
-set_target_properties(join_server join server PROPERTIES
+set_target_properties(yamr map_reduce PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
     COMPILE_OPTIONS -Wpedantic -Wall -Wextra
 )
 
-target_link_libraries(server
-    join
-)
-
-target_link_libraries(join_server
-    join
-    server
-    Boost::thread
+target_link_libraries(yamr
+    pthread
+    stdc++fs
+    map_reduce
 )
 
 install(
-    TARGETS join_server
+    TARGETS yamr
     RUNTIME DESTINATION bin
 )
 

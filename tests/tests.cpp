@@ -1,153 +1,99 @@
 #include <gtest/gtest.h>
-#include "../src/join.h"
+#include <dirent.h>
+#include "../src/map_reduce.h"
 
-class TestDatabase: public ::testing::Test
+class TestMapReduce: public ::testing::Test
 {
 protected:
-    join::Database database;
+    void
+    TearDown ( )
+    {
+        DIR* test_dir = opendir(".");
+        struct dirent* file_;
+        std::string LOG_END_PATTERN     = "xx.txt";
+
+        while ( (file_ = readdir (test_dir)) != NULL )
+        {
+            std::string filename = file_->d_name;
+            if ( filename.size ( ) > 6 and
+                    LOG_END_PATTERN.compare ( filename.substr( filename.size ( ) - 6 ) ) == 0 )
+            {
+                std::cout << "rm " << filename << std::endl;
+                std::remove ( filename.c_str ( ) );
+            }
+        }
+
+        closedir(test_dir);
+    }
 };
 
-TEST_F ( TestDatabase, insert_check )
+TEST_F ( TestMapReduce, compute_index_1 )
 {
-    ASSERT_EQ( database.insert ( "A 10 xxx\n" ),
-            "OK\n"
-    );
+    map::ReducedWord word_1 { "hello", 0, 1 };
+    map::ReducedWord word_2 { "hi", 0, 1 };
 
-    ASSERT_EQ( database.insert ( "B 10 yyy\n" ),
-            "OK\n"
-    );
+    map::compute_index ( word_1, word_2 );
 
-    ASSERT_EQ( database.insert ( "A 10 zzz\n" ),
-            "ERR duplicate 10\n"
-    );
+    ASSERT_EQ ( word_1.prefix_length, 2 );
+    ASSERT_EQ ( word_2.prefix_length, 2 );
+}
 
-    ASSERT_EQ( database.insert ( "A 1\n" ),
-            "Check Syntax\n"
-    );
+TEST_F ( TestMapReduce, compute_index_2 )
+{
+    map::ReducedWord word_1 { "yes", 0, 1 };
+    map::ReducedWord word_2 { "no", 0, 1 };
 
-    ASSERT_EQ( database.insert ( "A 1 uuu ppp\n" ),
-            "Check Syntax\n"
-    );
+    map::compute_index ( word_1, word_2 );
 
-    ASSERT_EQ( database.insert ( "CXX 10 ccc\n" ),
-            "Incorrect table name CXX\n"
+    ASSERT_EQ ( word_1.prefix_length, 1 );
+    ASSERT_EQ ( word_2.prefix_length, 1 );
+}
+
+TEST_F ( TestMapReduce, compute_index_3 )
+{
+    map::ReducedWord word_1 { "yesyesno", 0, 1 };
+    map::ReducedWord word_2 { "yesyesyes", 0, 1 };
+
+    map::compute_index ( word_1, word_2 );
+
+    ASSERT_EQ ( word_1.prefix_length, 7 );
+    ASSERT_EQ ( word_2.prefix_length, 7 );
+}
+
+TEST_F ( TestMapReduce, reduce )
+{
+    std::queue<std::string> not_reduced_words;
+    not_reduced_words.emplace ( "max_xx" );
+    not_reduced_words.emplace ( "min_xx" );
+    not_reduced_words.emplace ( "sort_xx" );
+    not_reduced_words.emplace ( "sort_xx" );
+    not_reduced_words.emplace ( "tail_xx" );
+    not_reduced_words.emplace ( "take_xx" );
+
+    map::reduce ( not_reduced_words );
+
+    std::ifstream in ( "max_xx.txt" );
+    std::string respond, tmp;
+    while ( true )
+    {
+        std::getline( in, tmp );
+        if ( not in.good ( ) )
+        {
+            break;
+        }
+        respond += tmp + "\n";
+    }
+
+    ASSERT_EQ ( respond,
+        "max_xx - ma\n"
+        "min_xx - mi\n"
+        "sort_xx - s\n"
+        "sort_xx - s\n"
+        "tail_xx - tai\n"
+        "take_xx - tak\n"
     );
 }
 
-TEST_F ( TestDatabase, intersection )
-{
-    ASSERT_EQ( database.insert ( "A 10 xxx\n" ),
-            "OK\n"
-    );
-
-    ASSERT_EQ( database.insert ( "B 10 yyy\n" ),
-            "OK\n"
-    );
-
-    ASSERT_EQ( database.inner_join ( ),
-            "10,xxx,yyy\n"
-            "OK\n"
-    );
-
-    ASSERT_EQ( database.insert ( "A 1 uuu\n" ),
-            "OK\n"
-    );
-
-    ASSERT_EQ( database.insert ( "B 2 ccc\n" ),
-            "OK\n"
-    );
-
-    ASSERT_EQ( database.insert ( "A 2 ggg\n" ),
-            "OK\n"
-    );
-
-    ASSERT_EQ( database.inner_join ( ),
-            "2,ggg,ccc\n"
-            "10,xxx,yyy\n"
-            "OK\n"
-    );
-}
-
-TEST_F ( TestDatabase, symmetric_difference )
-{
-    ASSERT_EQ( database.insert ( "A 10 xxx\n" ),
-            "OK\n"
-    );
-
-    ASSERT_EQ( database.insert ( "B 10 yyy\n" ),
-            "OK\n"
-    );
-
-    ASSERT_EQ( database.anti_join ( ),
-            "OK\n"
-    );
-
-    ASSERT_EQ( database.insert ( "A 1 uuu\n" ),
-            "OK\n"
-    );
-
-    ASSERT_EQ( database.insert ( "B 2 ccc\n" ),
-            "OK\n"
-    );
-
-    ASSERT_EQ( database.anti_join ( ),
-            "1,uuu,\n"
-            "2,,ccc\n"
-            "OK\n"
-    );
-}
-
-TEST_F ( TestDatabase, truncate )
-{
-    ASSERT_EQ( database.insert ( "A 10 xxx\n" ),
-            "OK\n"
-    );
-
-    ASSERT_EQ( database.insert ( "B 10 yyy\n" ),
-            "OK\n"
-    );
-
-    ASSERT_EQ( database.inner_join ( ),
-            "10,xxx,yyy\n"
-            "OK\n"
-    );
-
-    ASSERT_EQ( database.insert ( "A 1 uuu\n" ),
-            "OK\n"
-    );
-
-    ASSERT_EQ( database.insert ( "B 2 ccc\n" ),
-            "OK\n"
-    );
-
-    ASSERT_EQ( database.anti_join ( ),
-            "1,uuu,\n"
-            "2,,ccc\n"
-            "OK\n"
-    );
-
-    ASSERT_EQ( database.truncate ( "A" ),
-            "OK\n"
-    );
-
-    ASSERT_EQ( database.inner_join ( ),
-            "OK\n"
-    );
-
-    ASSERT_EQ( database.anti_join ( ),
-            "2,,ccc\n"
-            "10,,yyy\n"
-            "OK\n"
-    );
-
-    ASSERT_EQ( database.truncate ( "B" ),
-            "OK\n"
-    );
-
-    ASSERT_EQ( database.anti_join ( ),
-            "OK\n"
-    );
-}
 
 int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);

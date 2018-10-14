@@ -1,7 +1,7 @@
 #include <iostream>
 #include <tuple>
 
-#include "mappers.h"
+#include "map_reduce.h"
 
 namespace map
 {

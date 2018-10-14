@@ -2,5 +2,8 @@ test_dir
 *.swp
 *.swo
 *.out
+file.txt
+tests
+main
 log
 tmp

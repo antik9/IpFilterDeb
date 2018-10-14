@@ -11,7 +11,7 @@ namespace async
             {
                 Connector* connector_ptr = new Connector ( bulk );
                 connector_ptr->connect ( );
-                __connectors.insert ( std::pair<int, Connector*> ( i, connector_ptr ) );
+                __connectors.insert ( std::make_pair ( i, connector_ptr ) );
                 return i;
             }
         }

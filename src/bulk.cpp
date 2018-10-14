@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <thread>
+#include <uuid/uuid.h>
 
 #include "bulk.hpp"
 
@@ -453,8 +454,12 @@ namespace bulkmt
         auto duration = now.time_since_epoch();
 
         auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(duration);
+        char uuidBuff[36];
+        uuid_t uuidGenerated;
+        uuid_generate_random ( uuidGenerated );
+        uuid_unparse ( uuidGenerated, uuidBuff );
 
-        filename_sstream << "bulk" << microseconds.count() << ".log";
+        filename_sstream << "bulk" << microseconds.count() << uuidBuff << ".log";
         return filename_sstream.str();
     }
 }

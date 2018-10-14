@@ -34,6 +34,8 @@ namespace bulk
 
         void
         serve_forever   ( );
+        void
+        stop            ( );
 
     private:
         unsigned short  port;

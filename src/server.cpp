@@ -10,12 +10,11 @@ namespace bulk
     Server::Server  ( unsigned short port, size_t bulk_size ) :
         port ( port ), handler ( async::connect ( bulk_size ) ) { }
 
-    Server::~Server ( ) { async::disconnect ( handler ); }
+    Server::~Server ( ) { stop ( ); }
 
     void
     Server::serve_forever   ( )
     {
-
         boost::asio::io_service         service;
         boost::asio::ip::tcp::endpoint  ep (
             boost::asio::ip::tcp::v4 ( ),
@@ -51,6 +50,9 @@ namespace bulk
 
     Session::Session ( boost::asio::ip::tcp::socket sock, const async::handle_t& handler ) :
         sock ( std::move ( sock ) ), handler ( handler ), block_inits ( 0 ) { }
+
+    void
+    Server::stop ( ) { async::disconnect ( handler ); }
 
     void
     Session::operator() ( )

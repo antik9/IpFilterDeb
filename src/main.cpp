@@ -9,7 +9,7 @@ signalHandler ( int signum )
 {
     if ( server_ptr )
     {
-        server_ptr->~Server ( );
+        server_ptr->stop ( );
     }
     exit(signum);
 }

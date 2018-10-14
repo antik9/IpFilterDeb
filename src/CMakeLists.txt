@@ -28,6 +28,7 @@ set_target_properties(async bulk server PROPERTIES
 
 target_link_libraries(bulk
     pthread
+    uuid
 )
 
 target_link_libraries(async

@@ -18,10 +18,10 @@ before_install:
  - wget 'http://dlib.net/files/dlib-19.16.tar.bz2' -O dlib-19.16.tar.bz2
  - tar xvf dlib-19.16.tar.bz2
  - cd dlib-19.16
- - cmake .
- - make
- - make install
- - cp -ar dlib /usr/include/dlib
+ - sudo cmake .
+ - sudo make
+ - sudo make install
+ - sudo cp -ar dlib /usr/include/dlib
  - cd "${TRAVIS_BUILD_DIR}"
 
 script:

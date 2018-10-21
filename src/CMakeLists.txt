@@ -31,7 +31,7 @@ install(
 )
 
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/datasets/" DESTINATION "/usr/share/datasets")
-install(DIRECTORY "${PROJECT_SOURCE_DIR}/plot_datasets" DESTINATION "/usr/local/bin")
+install(FILES "${PROJECT_SOURCE_DIR}/plot_datasets" DESTINATION "/usr/local/bin/plot_datasets")
 
 set(CPACK_GENERATOR DEB)
 

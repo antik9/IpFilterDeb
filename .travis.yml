@@ -8,13 +8,20 @@ env:
 
 before_install:
  - sudo apt-get -qq update
- - sudo apt-get install -y cmake wget unzip
+ - sudo apt-get install -y cmake wget unzip libboost-system-dev libblas-dev libopenblas-base
  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
  - sudo apt-get -qq update
  - sudo apt-get install -y g++-5
  - export GXXPATH="`which g++`"
  - sudo rm $GXXPATH
  - sudo ln -s "`which g++-5`" $GXXPATH
+ - wget 'http://dlib.net/files/dlib-19.16.tar.bz2' -O dlib-19.16.tar.bz2
+ - tar xvf dlib-19.16.tar.bz2
+ - cd dlib-19.16
+ - cmake .
+ - make
+ - make install
+ - cp -ar dlib /usr/include/dlib
  - cd "${TRAVIS_BUILD_DIR}"
 
 script:

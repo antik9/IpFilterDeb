@@ -8,53 +8,30 @@ endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-project(bulk_server VERSION 0.0.${BUILD_NUMBER})
+project(kkmeans VERSION 0.0.${BUILD_NUMBER})
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(bulk_server main.cpp)
+add_executable(kkmeans main.cpp)
 
-add_library(bulk bulk.cpp bulk.hpp)
-
-add_library(async async.cpp async.h)
-
-add_library(server server.cpp server.h)
-
-set_target_properties(async bulk server PROPERTIES
+set_target_properties(kkmeans PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
     COMPILE_OPTIONS -Wpedantic -Wall -Wextra
 )
 
-target_link_libraries(bulk
-    pthread
-    uuid
-)
-
-target_link_libraries(async
-    pthread
-    bulk
-)
-
-target_link_libraries(server
-    pthread
-    boost_system
-    bulk
-    async
-)
-
-target_link_libraries(bulk_server
-    pthread
-    boost_system
-    bulk
-    async
-    server
+target_link_libraries(kkmeans
+    dlib
+    blas    
 )
 
 install(
-    TARGETS bulk_server
+    TARGETS kkmeans 
     RUNTIME DESTINATION bin
 )
+
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/datasets/" DESTINATION "/usr/share/datasets")
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/plot_datasets" DESTINATION "/usr/local/bin")
 
 set(CPACK_GENERATOR DEB)
 

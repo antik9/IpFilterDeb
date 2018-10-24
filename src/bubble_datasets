@@ -29,7 +29,7 @@ for i in range(max(clusters)):
 xs = [cluster[0] for cluster in cluster_info]
 ys = [cluster[1] for cluster in cluster_info]
 area = [cluster[2] * 10 for cluster in cluster_info]
-color = list(range(2, 2 + max(clusters)))
+color = range(2, 2 + max(clusters))
 
 sct = scatter(xs, ys, c=color, s=area, linewidths=2, edgecolor='w')
 sct.set_alpha(0.75)

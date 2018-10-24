@@ -31,7 +31,8 @@ install(
 )
 
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/datasets/" DESTINATION "/usr/share/datasets")
-install(FILES "${PROJECT_SOURCE_DIR}/plot_datasets" DESTINATION "/usr/local/bin/plot_datasets")
+install(FILES "${PROJECT_SOURCE_DIR}/bubble_datasets" DESTINATION "/usr/local/bin/bubble_datasets")
+install(FILES "${PROJECT_SOURCE_DIR}/scatter_datasets" DESTINATION "/usr/local/bin/scatter_datasets")
 
 set(CPACK_GENERATOR DEB)
 

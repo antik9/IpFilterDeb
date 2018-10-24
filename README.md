@@ -7,5 +7,6 @@ Also you needed python3-tk and python packages:
 
 You can run plot command like so:
 ```
-kkmeans 4 < /usr/shared/datasets/sky.txt | plot_datasets
+kkmeans 4 < /usr/shared/datasets/sky.txt | bubble_datasets
+kkmeans 4 < /usr/shared/datasets/sky.txt | scatter_datasets
 ```

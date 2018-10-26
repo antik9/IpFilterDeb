@@ -85,12 +85,12 @@ TEST_F ( TestMapReduce, reduce )
     }
 
     ASSERT_EQ ( respond,
-        "max_xx - ma\n"
-        "min_xx - mi\n"
-        "sort_xx - s\n"
-        "sort_xx - s\n"
-        "tail_xx - tai\n"
-        "take_xx - tak\n"
+        "2\n"
+        "2\n"
+        "1\n"
+        "1\n"
+        "3\n"
+        "3\n"
     );
 }
 

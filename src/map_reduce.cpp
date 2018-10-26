@@ -7,7 +7,7 @@ namespace map
 {
     void
     map ( Container& container, std::string& src, std::ifstream::pos_type current,
-            std::ifstream::pos_type next ) 
+            std::ifstream::pos_type next )
     {
         std::string email;
         std::ifstream in ( src );
@@ -16,7 +16,7 @@ namespace map
         {
             in >> email;
             current = in.tellg ( );
-            if ( ( next != EOF and current < next and current != EOF ) 
+            if ( ( next != EOF and current < next and current != EOF )
                     or ( next == EOF and current != EOF ) )
             {
                 container.emplace ( email );
@@ -33,9 +33,9 @@ namespace map
     shuffle ( std::vector<Container>& mapper_containers,
             std::vector<std::queue<std::string>>& reducer_containers )
     {
-        auto base = reducer_containers.size ( ); 
+        auto base = reducer_containers.size ( );
         PairContainer stack_words;
-        
+
         for ( auto i = 0; i < mapper_containers.size ( ); ++i )
         {
             if ( not mapper_containers[i].empty ( ) )
@@ -54,7 +54,7 @@ namespace map
             int container_idx;
             std::tie ( next_word, container_idx ) = stack_words.top ( );
             stack_words.pop ( );
-            
+
             if ( not next_word.empty ( ) )
             {
                 ++counter2;
@@ -86,19 +86,21 @@ namespace map
             }
         }
 
-        previous.prefix_length = previous.prefix_length > prefix_length 
-                                    ? previous.prefix_length 
+        prefix_length = ( prefix_length == 0 ) ? max_length : prefix_length;
+
+        previous.prefix_length = previous.prefix_length > prefix_length
+                                    ? previous.prefix_length
                                     : prefix_length;
 
-        previous.prefix_length = previous.prefix_length > previous_size 
+        previous.prefix_length = previous.prefix_length > previous_size
                                     ? previous_size
                                     : previous.prefix_length;
 
-        next.prefix_length = next.prefix_length > prefix_length 
-                                    ? next.prefix_length 
+        next.prefix_length = next.prefix_length > prefix_length
+                                    ? next.prefix_length
                                     : prefix_length;
 
-        next.prefix_length = next.prefix_length > next_size 
+        next.prefix_length = next.prefix_length > next_size
                                     ? next_size
                                     : next.prefix_length;
     }
@@ -113,8 +115,7 @@ namespace map
         {
             for ( int i = 0; i < reduce_word.repeat; ++i )
             {
-                out << reduce_word.self << " - "
-                    << reduce_word.self.substr ( 0, reduce_word.prefix_length ) << std::endl;
+                out << reduce_word.prefix_length << std::endl;
             }
         }
         out.close ( );
@@ -157,7 +158,7 @@ namespace map
                 reduced_words.push_back ( previous );
             }
         }
-        
+
         if ( next.self.empty ( ) and not previous.self.empty ( ) )
         {
             reduced_words.push_back ( previous );
@@ -166,7 +167,7 @@ namespace map
         {
             reduced_words.push_back ( next );
         }
-        
+
         if ( not reduced_words.empty ( ) )
         {
             write_to_file ( reduced_words );

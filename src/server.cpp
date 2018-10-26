@@ -7,7 +7,6 @@
 
 namespace join
 {
-
     Server::Server  ( unsigned short port ) : port ( port ) { }
 
     void
@@ -33,6 +32,9 @@ namespace join
 
     Session::Session ( boost::asio::ip::tcp::socket sock, Database* database_ptr ) :
         sock ( std::move ( sock ) ), database_ptr ( database_ptr ) { }
+
+    Session::Session ( Session&& sess ) :
+        sock ( std::move ( sess.sock ) ), database_ptr ( sess.database_ptr ) { }
 
     void
     Session::operator() ( )
@@ -65,22 +67,22 @@ namespace join
                         }
 
                         command_args = command_args.substr ( idx );
-                        if ( command == "INSERT" )
+                        if ( command == INSERT )
                         {
                             sock.write_some(
                                 boost::asio::buffer ( database_ptr->insert ( command_args ) ) );
                         }
-                        else if ( command == "TRUNCATE" )
+                        else if ( command == TRUNCATE )
                         {
                             sock.write_some(
                                 boost::asio::buffer ( database_ptr->truncate ( command_args ) ) );
                         }
-                        else if ( command == "INTERSECTION" )
+                        else if ( command == INTERSECTION )
                         {
                             sock.write_some(
                                 boost::asio::buffer ( database_ptr->inner_join ( ) ) );
                         }
-                        else if ( command == "SYMMETRIC_DIFFERENCE" )
+                        else if ( command == SYMMETRIC_DIFFERENCE )
                         {
                             sock.write_some(
                                 boost::asio::buffer ( database_ptr->anti_join ( ) ) );
@@ -88,14 +90,14 @@ namespace join
                         else
                         {
                             sock.write_some(
-                                boost::asio::buffer ( "Unknown command\n" ) );
+                                boost::asio::buffer ( UNKNOWN_COMMAND ) );
                         }
                     }
 
                 }
             }
             catch ( const std::exception &e ) {
-                sock.write_some ( boost::asio::buffer ( "UNKNOWN ERROR\n" ) );
+                sock.write_some ( boost::asio::buffer ( UNKNOWN_ERROR ) );
                 break;
             }
        }

@@ -14,22 +14,22 @@ set(CMAKE_CXX_STANDARD 14)
 
 add_executable(join_server main.cpp)
 
-add_library(join join.cpp join.h)
+add_library(database database.cpp database.h)
 
 add_library(server server.cpp server.h)
 
-set_target_properties(join_server join server PROPERTIES
+set_target_properties(join_server database server PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
     COMPILE_OPTIONS -Wpedantic -Wall -Wextra
 )
 
 target_link_libraries(server
-    join
+    database
 )
 
 target_link_libraries(join_server
-    join
+    database
     server
     Boost::thread
 )

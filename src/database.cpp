@@ -1,6 +1,6 @@
 #include <sstream>
 
-#include "join.h"
+#include "database.h"
 
 namespace join
 {
@@ -11,19 +11,19 @@ namespace join
 
         if ( next_pos ( start_idx, separator_idx, command ) == INCORRECT_SYNTAX )
         {
-            return std::string ( "Check Syntax\n" );
+            return std::string ( CHECK_SYNTAX );
         }
 
         std::string table_name = command.substr ( 0, separator_idx );
 
         if ( separator_idx != 1 or ( table_name != TABLE_A_NAME and table_name != TABLE_B_NAME ) )
         {
-            return std::string ( "Incorrect table name " + table_name + "\n" );
+            return std::string ( INCORRECT_TABLE_NAME + " " + table_name + "\n" );
         }
 
         if ( next_pos ( start_idx, separator_idx, command ) == INCORRECT_SYNTAX )
         {
-            return std::string ( "Check Syntax\n" );
+            return std::string ( CHECK_SYNTAX );
         }
 
         unsigned int id = std::atoi (
@@ -32,7 +32,7 @@ namespace join
         start_idx = separator_idx + 1;
         if ( ( separator_idx = command.find ( SPACE_SEPARATOR, start_idx ) ) != std::string::npos )
         {
-            return std::string ( "Check Syntax\n" );
+            return std::string ( CHECK_SYNTAX );
         }
 
         std::string name            = command.substr ( start_idx );
@@ -48,12 +48,12 @@ namespace join
             WriteLock w_lock ( update_table_lock );
             if ( update_table.find ( id ) != update_table.end ( ) )
             {
-                return std::string ( "ERR duplicate " + std::to_string ( id ) + "\n" );
+                return std::string ( ERR_DUPLICATE + " " + std::to_string ( id ) + "\n" );
             }
-            update_table.insert ( std::pair<int, std::string> { id, name } );
+            update_table.insert ( std::make_pair ( id, name ) );
         }
 
-        return std::string ( "OK\n" );
+        return SUCCESS;
     }
 
     std::string
@@ -72,7 +72,7 @@ namespace join
             }
         }
 
-        intersection << "OK\n";
+        intersection << SUCCESS;
         return intersection.str ( );
     }
 
@@ -104,7 +104,7 @@ namespace join
             }
         }
 
-        difference << "OK\n";
+        difference << SUCCESS;
         return difference.str ( );
     }
 
@@ -115,7 +115,7 @@ namespace join
 
         if ( ( table_name != TABLE_A_NAME and table_name != TABLE_B_NAME ) )
         {
-            return std::string ( "Incorrect table name\n" );
+            return std::string ( INCORRECT_TABLE_NAME + "\n" );
         }
 
         Table& update_table         = table_name == TABLE_A_NAME ? A : B;
@@ -126,7 +126,7 @@ namespace join
             update_table.clear ( );
         }
 
-        return std::string ( "OK\n" );
+        return SUCCESS;
     }
 
     int

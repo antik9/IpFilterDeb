@@ -16,7 +16,7 @@ if (GTest_FOUND)
 	    boost_system
 	    Boost::thread
 	    ${GTEST_BOTH_LIBRARIES}
-	    join
+	    database
 	)
 
 	enable_testing()

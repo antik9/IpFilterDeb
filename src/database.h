@@ -8,6 +8,11 @@
 
 namespace join
 {
+    const std::string CHECK_SYNTAX          = "Check Syntax\n";
+    const std::string INCORRECT_TABLE_NAME  = "Incorrect table name";
+    const std::string ERR_DUPLICATE         = "ERR duplicate";
+    const std::string SUCCESS               = "OK\n";
+
     const char          SPACE_SEPARATOR     = ' ';
     const std::string   TABLE_A_NAME        = "A";
     const std::string   TABLE_B_NAME        = "B";

@@ -4,7 +4,7 @@ dist: trusty
 
 env:
   global:
-  - PACKAGE_NAME=kkmeans
+  - PACKAGE_NAME=realty
 
 before_install:
  - sudo apt-get -qq update
@@ -35,4 +35,4 @@ deploy:
   script:
     - curl -T /home/travis/build/antik9/OtusCpp/$PACKAGE_NAME-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb -uantik9:$BINTRAY_API_KEY "https://api.bintray.com/content/antik9/HelloWorld/$PACKAGE_NAME/$TRAVIS_BUILD_NUMBER/$PACKAGE_NAME-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb;deb_distribution=trusty;deb_component=main;deb_architecture=amd64;publish=1"
   on:
-      branch: kmeans
+      branch: realty

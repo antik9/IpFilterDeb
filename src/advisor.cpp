@@ -134,8 +134,6 @@ namespace realty
         std::ifstream input_file ( __filename + ".meta.dat" );
         input_file.read ( ( char * ) &__meta, sizeof ( __meta ) );
         input_file.close ( );
-        std::cout << __meta.model_filename << " " << __meta.data_filename << " "
-            << __meta.unifier_filename << " " << __meta.sample_size << std::endl;
     }
 
     void
@@ -197,7 +195,7 @@ namespace realty
             ( __filename + ".sample.dat" ).c_str ( ),
             __filename.size ( ) + 11
         );
-        __meta.sample_size = sizeof ( __samples.size ( ) );
+        __meta.sample_size =  __samples.size ( );
         DataRow row;
 
         std::ofstream output_file ( __meta.data_filename, std::ios::binary );
@@ -209,9 +207,9 @@ namespace realty
                 for ( int i = 0; i < 7; ++i )
                 {
                     row.row[i] = sample[i];
-                    row.cluster = key_value.first;
-                    output_file.write ( ( char* ) &row, sizeof ( row ) );
                 }
+                row.cluster = key_value.first;
+                output_file.write ( ( char* ) &row, sizeof ( row ) );
             }
         }
         output_file.close ( );

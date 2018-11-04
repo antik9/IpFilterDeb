@@ -8,31 +8,48 @@ endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-project(kkmeans VERSION 0.0.${BUILD_NUMBER})
+project(realty VERSION 0.0.${BUILD_NUMBER})
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(kkmeans main.cpp)
+add_library(advisor advisor.cpp)
 
-set_target_properties(kkmeans PROPERTIES
+add_library(read read.cpp)
+
+add_library(unifier unifier.cpp)
+
+add_executable(rclst rclst.cpp)
+
+add_executable(rclss rclss.cpp)
+
+set_target_properties(advisor read rclss rclst unifier PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
     COMPILE_OPTIONS -Wpedantic -Wall -Wextra
 )
 
-target_link_libraries(kkmeans
+target_link_libraries(unifier
+    read
+)
+
+target_link_libraries(advisor
     dlib
-    blas    
+    blas
+    unifier
+)
+
+target_link_libraries(rclss
+    advisor
+)
+
+target_link_libraries(rclst
+    advisor
 )
 
 install(
-    TARGETS kkmeans 
+    TARGETS rclss rclst
     RUNTIME DESTINATION bin
 )
-
-install(DIRECTORY "${PROJECT_SOURCE_DIR}/datasets/" DESTINATION "/usr/share/datasets")
-install(FILES "${PROJECT_SOURCE_DIR}/bubble_datasets" DESTINATION "/usr/local/bin/bubble_datasets")
-install(FILES "${PROJECT_SOURCE_DIR}/scatter_datasets" DESTINATION "/usr/local/bin/scatter_datasets")
 
 set(CPACK_GENERATOR DEB)
 

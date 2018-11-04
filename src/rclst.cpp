@@ -1,60 +1,27 @@
 #include <iostream>
-#include <vector>
 
-#include <dlib/clustering.h>
-#include <dlib/serialize.h>
-
-#include "read.h"
-#include "unifier.h"
-
-using namespace dlib;
+#include "advisor.h"
 
 int
 main ( int argc, char **argv )
 {
-    if ( argc != 2 )
+    if ( argc != 3 )
     {
-        std::cout << "Provide filename: ./rclss <filename>\n";
+        std::cout << "Provide number of clusters and filename: ./rclst <num> <filename>\n";
         exit ( 1 );
     }
 
-    std::string filename = argv[1];
-
-    typedef matrix<double,7,1> sample_type;
-    typedef radial_basis_kernel<sample_type> kernel_type;
-    kcentroid<kernel_type> kc ( kernel_type ( .1 ), .01, 1024 );
-    kkmeans<kernel_type> test ( kc );
-
-    auto unifier = realty::SampleUnifier ( );
-
-    std::vector<sample_type> samples;
-    auto  __samples = realty::get_raw_data ( );
-
-    unifier.restore_from_file ( "unifier.dat" );
-
-    for ( int i = 0; i < 7; ++i )
+    unsigned short number_of_clusters = std::atoi ( argv[1] );
+    if ( number_of_clusters == 0 )
     {
-        unifier.unify ( __samples, i );
+        std::cout << "Number of clusters should be a positive number\n";
     }
+    std::string filename = argv[2];
 
-    sample_type m;
-
-    samples.reserve ( __samples.size ( ) );
-    for ( auto& sample: __samples )
-    {
-        for ( int i = 0; i < 7; ++i )
-        {
-            m ( i ) = sample[i];
-        }
-        samples.push_back ( m );
-    }
-
-    deserialize ( filename + ".dat" ) >> test;
-    for (unsigned long i = 0; i < samples.size(); ++i)
-    {
-        auto x = samples[i];
-        std::cout << test ( samples[i] ) + 1 << std::endl;
-    }
+    realty::Advisor advisor ( filename );
+    advisor.read_data       ( );
+    advisor.train           ( number_of_clusters );
+    advisor.save            ( );
 
     return 0;
 }

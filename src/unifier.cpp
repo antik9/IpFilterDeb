@@ -54,5 +54,6 @@ namespace realty
     {
         std::ifstream input_file ( filename, std::ios::binary );
         input_file.read ( ( char* ) this, sizeof ( *this ) );
+        input_file.close ( );
     }
 }

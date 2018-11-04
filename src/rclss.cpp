@@ -1,5 +1,4 @@
 #include <iostream>
-#include <string>
 #include <vector>
 
 #include <dlib/clustering.h>
@@ -27,35 +26,28 @@ main ( int argc, char **argv )
     }
     std::string filename = argv[2];
 
-    typedef matrix<double,7,1> sample_type;
-    typedef radial_basis_kernel<sample_type> kernel_type;
     auto unifier = realty::SampleUnifier ( );
-
-    kcentroid<kernel_type> kc ( kernel_type ( .1 ), .01, 1024 );
-    kkmeans<kernel_type> test ( kc );
-
-    std::vector<sample_type> samples;
-    std::vector<sample_type> initial_centers;
     auto  __samples = realty::get_raw_data ( );
-    auto __samples_real = __samples;
 
     for ( int i = 0; i < 7; ++i )
     {
         unifier.unify ( __samples, i );
     }
     unifier.save_to_file ( "unifier.dat" );
-    unifier.restore_from_file ( "unifier.dat" );
 
-    for ( int i = 0; i < 7; ++i )
-    {
-        unifier.unify ( __samples_real, i );
-    }
+    typedef matrix<double,7,1> sample_type;
+    typedef radial_basis_kernel<sample_type> kernel_type;
+
+    kcentroid<kernel_type> kc ( kernel_type ( .1 ), .01, 1024 );
+    kkmeans<kernel_type> test ( kc );
+    std::vector<sample_type> samples;
+    std::vector<sample_type> initial_centers;
 
     sample_type m;
     dlib::rand rnd;
 
     samples.reserve ( __samples.size ( ) );
-    for ( auto& sample: __samples_real )
+    for ( auto& sample: __samples )
     {
         for ( int i = 0; i < 7; ++i )
         {
@@ -67,12 +59,6 @@ main ( int argc, char **argv )
     test.set_number_of_centers ( number_of_clusters );
     pick_initial_centers ( number_of_clusters, initial_centers, samples, test.get_kernel ( ) );
     test.train ( samples, initial_centers );
-
-    for (unsigned long i = 0; i < samples.size(); ++i)
-    {
-        auto x = samples[i];
-        std::cout << test ( samples[i] ) + 1 << std::endl;
-    }
 
     serialize ( filename + ".dat" ) << test;
 

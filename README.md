@@ -1,12 +1,11 @@
-## KMeans
+## Realty
 
-To run plot script you needed python3 installed on your machine.
-Also you needed python3-tk and python packages:
-    - matplotlib
-    - numpy
-
-You can run plot command like so:
+To train model run
 ```
-kkmeans 4 < /usr/shared/datasets/sky.txt | bubble_datasets
-kkmeans 4 < /usr/shared/datasets/sky.txt | scatter_datasets
+rclst <number_of_cluster> <NAME> < train.csv
+```
+
+To get result cluster run
+```
+rclass <NAME> < test.csv
 ```

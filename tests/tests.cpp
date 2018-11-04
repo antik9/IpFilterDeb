@@ -73,24 +73,11 @@ TEST_F ( TestMapReduce, reduce )
     map::reduce ( not_reduced_words );
 
     std::ifstream in ( "max_xx.txt" );
-    std::string respond, tmp;
-    while ( true )
-    {
-        std::getline( in, tmp );
-        if ( not in.good ( ) )
-        {
-            break;
-        }
-        respond += tmp + "\n";
-    }
+    std::string respond;
+    in >> respond;
 
     ASSERT_EQ ( respond,
-        "2\n"
-        "2\n"
-        "1\n"
-        "1\n"
-        "3\n"
-        "3\n"
+        "3"
     );
 }
 

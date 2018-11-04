@@ -111,13 +111,14 @@ namespace map
         std::string filename = reduced_words[0].self + ".txt";
         std::ofstream out ( filename, std::ofstream::trunc );
 
+        size_t max_length = 0;
         for ( auto& reduce_word: reduced_words )
         {
-            for ( int i = 0; i < reduce_word.repeat; ++i )
-            {
-                out << reduce_word.prefix_length << std::endl;
-            }
+            max_length = reduce_word.prefix_length > max_length
+                ? reduce_word.prefix_length
+                : max_length;
         }
+        out << max_length;
         out.close ( );
     }
 

@@ -1,5 +1,6 @@
 test_dir
 tests/
+*.csv
 *.swp
 *.swo
 *.out

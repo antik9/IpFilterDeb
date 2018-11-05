@@ -118,7 +118,7 @@ namespace map
     reduce ( std::queue<std::string>& reduce_container, int reducer_idx )
     {
         ReducedWord previous { "", 0, 0 }, next { "", 0, 0 };
-        size_t max_length = 1;
+        size_t max_length = 0;
         std::string word;
 
         while ( not reduce_container.empty ( ) )
@@ -158,6 +158,9 @@ namespace map
                                 : next.prefix_length;
         }
 
-        write_to_file ( max_length, reducer_idx );
+        if ( max_length )
+        {
+            write_to_file ( max_length, reducer_idx );
+        }
     }
 }

@@ -81,7 +81,7 @@ main ( int argc, char **argv )
     for ( int i = 0; i < n_reducers; ++i )
     {
         reducers.emplace_back ( std::thread ( map::reduce,
-                                            std::ref ( reducer_containers[i] ) ) );
+                                            std::ref ( reducer_containers[i] ), i + 1 ) );
     }
 
     for ( int i = 0; i < n_reducers; ++i )

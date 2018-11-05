@@ -45,11 +45,10 @@ namespace map
     compute_index ( ReducedWord& previous, ReducedWord& next );
 
     void
-    write_to_file ( std::vector<ReducedWord>& );
+    write_to_file ( int max_length, int reducer_idx );
 
     void
     shuffle ( std::vector<Container>&, std::vector<std::queue<std::string>>& );
 
-    void reduce ( std::queue<std::string>& );
-
+    void reduce ( std::queue<std::string>&, int reducer_idx );
 }

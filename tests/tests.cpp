@@ -63,21 +63,39 @@ TEST_F ( TestMapReduce, compute_index_3 )
 TEST_F ( TestMapReduce, reduce )
 {
     std::queue<std::string> not_reduced_words;
-    not_reduced_words.emplace ( "max_xx" );
-    not_reduced_words.emplace ( "min_xx" );
-    not_reduced_words.emplace ( "sort_xx" );
-    not_reduced_words.emplace ( "sort_xx" );
-    not_reduced_words.emplace ( "tail_xx" );
-    not_reduced_words.emplace ( "take_xx" );
+    not_reduced_words.emplace ( "max" );
+    not_reduced_words.emplace ( "min" );
+    not_reduced_words.emplace ( "sort" );
+    not_reduced_words.emplace ( "start" );
+    not_reduced_words.emplace ( "tail" );
+    not_reduced_words.emplace ( "take" );
 
-    map::reduce ( not_reduced_words );
+    map::reduce ( not_reduced_words, 1 );
 
-    std::ifstream in ( "max_xx.txt" );
+    std::ifstream in ( "reducer_1.txt" );
     std::string respond;
     in >> respond;
 
     ASSERT_EQ ( respond,
         "3"
+    );
+}
+
+TEST_F ( TestMapReduce, reduce_same_word )
+{
+    std::queue<std::string> not_reduced_words;
+    not_reduced_words.emplace ( "abcd" );
+    not_reduced_words.emplace ( "abcd" );
+    not_reduced_words.emplace ( "abcd" );
+
+    map::reduce ( not_reduced_words, 1 );
+
+    std::ifstream in ( "reducer_1.txt" );
+    std::string respond;
+    in >> respond;
+
+    ASSERT_EQ ( respond,
+        "5"
     );
 }
 

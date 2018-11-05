@@ -106,27 +106,19 @@ namespace map
     }
 
     void
-    write_to_file ( std::vector<ReducedWord>& reduced_words )
+    write_to_file ( int max_length, int reducer_idx )
     {
-        std::string filename = reduced_words[0].self + ".txt";
+        std::string filename = "reducer_" + std::to_string ( reducer_idx ) + ".txt";
         std::ofstream out ( filename, std::ofstream::trunc );
-
-        size_t max_length = 0;
-        for ( auto& reduce_word: reduced_words )
-        {
-            max_length = reduce_word.prefix_length > max_length
-                ? reduce_word.prefix_length
-                : max_length;
-        }
         out << max_length;
         out.close ( );
     }
 
     void
-    reduce ( std::queue<std::string>& reduce_container )
+    reduce ( std::queue<std::string>& reduce_container, int reducer_idx )
     {
-        ReducedWord previous, next;
-        std::vector<ReducedWord> reduced_words;
+        ReducedWord previous { "", 0, 0 }, next { "", 0, 0 };
+        size_t max_length = 1;
         std::string word;
 
         while ( not reduce_container.empty ( ) )
@@ -140,38 +132,32 @@ namespace map
             else if ( word == previous.self )
             {
                 ++previous.repeat;
+                previous.prefix_length = word.size ( ) + 1;
             }
             else if ( next.self.empty ( ) )
             {
                 next = { word, 0, 1 };
                 compute_index ( previous, next );
-                reduced_words.push_back ( previous );
             }
             else if ( next.self == word )
             {
                 ++next.repeat;
+                next.prefix_length = word.size ( ) + 1;
             }
             else
             {
                 previous = next;
                 next = { word, 0, 1 };
                 compute_index ( previous, next );
-                reduced_words.push_back ( previous );
             }
+            max_length = max_length > previous.prefix_length
+                                ? max_length
+                                : previous.prefix_length;
+            max_length = max_length > next.prefix_length
+                                ? max_length
+                                : next.prefix_length;
         }
 
-        if ( next.self.empty ( ) and not previous.self.empty ( ) )
-        {
-            reduced_words.push_back ( previous );
-        }
-        else if ( not next.self.empty ( ) )
-        {
-            reduced_words.push_back ( next );
-        }
-
-        if ( not reduced_words.empty ( ) )
-        {
-            write_to_file ( reduced_words );
-        }
+        write_to_file ( max_length, reducer_idx );
     }
 }

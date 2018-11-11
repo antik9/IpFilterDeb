@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <fstream>
+#include <iomanip>
 #include <string.h>
 
 #include <dlib/clustering.h>
@@ -46,16 +47,25 @@ namespace realty
             }
         );
         std::cout << std::endl;
+        std::cout << "Nearest appartments for: "
+                << std::fixed << std::setprecision ( 4 ) << input_data[0] << ";"
+                << std::fixed << std::setprecision ( 4 ) << input_data[1] << ";"
+                << std::fixed << std::setprecision ( 0 ) << input_data[2] << ";"
+                << std::fixed << std::setprecision ( 1 ) << input_data[3] << ";"
+                << std::fixed << std::setprecision ( 2 ) << input_data[4] << ";"
+                << std::fixed << std::setprecision ( 2 ) << input_data[5] << ";"
+                << std::fixed << std::setprecision ( 0 ) << input_data[6] << std::endl << std::endl;
+
         for ( auto& sample: __cluster_to_samples[cluster] )
         {
             std::cout
-                << sample[0] << ";"
-                << sample[1] << ";"
-                << sample[2] << ";"
-                << sample[3] << ";"
-                << sample[4] << ";"
-                << sample[5] << ";"
-                << sample[6] << std::endl;
+                << std::fixed << std::setprecision ( 4 ) << sample[0] << ";"
+                << std::fixed << std::setprecision ( 4 ) << sample[1] << ";"
+                << std::fixed << std::setprecision ( 0 ) << sample[2] << ";"
+                << std::fixed << std::setprecision ( 1 ) << sample[3] << ";"
+                << std::fixed << std::setprecision ( 2 ) << sample[4] << ";"
+                << std::fixed << std::setprecision ( 2 ) << sample[5] << ";"
+                << std::fixed << std::setprecision ( 0 ) << sample[6] << std::endl;
         }
     }
 
